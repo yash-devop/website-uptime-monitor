@@ -1,6 +1,6 @@
 model Team {
   id                 String   @id @default(cuid())
-  teamName           String
+  teamName           String   @unique
   stripe_customer_id String?
   plan               Plans
   createdAt          DateTime @default(now())
