@@ -35,6 +35,10 @@ export const AUTH_OPTIONS = {
         },
       };
     },
+    authorized: async ({ auth }) => {
+      // Logged in users are authenticated, otherwise redirect to login page
+      return !!auth
+    },
   },
 } as NextAuthConfig
 export const { handlers, signIn, signOut, auth } = NextAuth(AUTH_OPTIONS);
