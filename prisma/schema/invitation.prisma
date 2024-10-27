@@ -1,0 +1,9 @@
+model Invitation {
+  id          String @id @default(cuid())
+  inviteToken String
+  inviteTo    String
+  inviterId   String
+  invitedBy   User   @relation(fields: [inviterId], references: [id])
+  teamId      String
+  team        Team   @relation(fields: [teamId], references: [id])
+}
