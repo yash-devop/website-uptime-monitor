@@ -5,7 +5,7 @@ model Team {
   plan               Plans
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
-
+  invitations        Invitation[]
   // relation
   members TeamMembership[]
 }
@@ -22,14 +22,6 @@ model TeamMembership {
   // I gave combined unique field so that no same user can join the same team again and again.
   // @@unique on userId and teamid means that it will combined and look them as unique.
   @@unique([userId, teamId])
-}
-
-model Invitation {
-  id          String @id @default(cuid())
-  inviteToken String
-  inviteTo    String
-  inviterId   String
-  invitedBy   User   @relation(fields: [inviterId], references: [id])
 }
 
 enum Roles {
