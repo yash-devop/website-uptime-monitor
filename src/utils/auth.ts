@@ -3,11 +3,16 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import prisma from "./prisma";
 import GitHub from "next-auth/providers/github";
-import {NextAuthConfig} from 'next-auth'
+import { NextAuthConfig } from "next-auth";
 
 export const AUTH_OPTIONS = {
   providers: [
-    Google,
+    Google({
+      clientId: process.env.AUTH_GOOGLE_ID!,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET!,
+      allowDangerousEmailAccountLinking: true,
+      authorization: `https://accounts.google.com/o/oauth2/auth/authorize?response_type=code&prompt=login`,
+    }),
     GitHub,
   ],
   adapter: PrismaAdapter(prisma),
@@ -37,10 +42,8 @@ export const AUTH_OPTIONS = {
     },
     authorized: async ({ auth }) => {
       // Logged in users are authenticated, otherwise redirect to login page
-      return !!auth
+      return !!auth;
     },
   },
-} as NextAuthConfig
+} as NextAuthConfig;
 export const { handlers, signIn, signOut, auth } = NextAuth(AUTH_OPTIONS);
-
-
