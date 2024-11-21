@@ -1,0 +1,24 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+frameworkVersion: "3"
+org: testyash
+# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
+app: uptime-checker
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+service: checking-service
+plugins:
+  - serverless-esbuild
+  - serverless-offline
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: ap-south-1
+
+functions:
+  logger:
+    handler: src/uptime.handler
+    events:
+      - httpApi:
+          path: /check
+          method: post
+
+
