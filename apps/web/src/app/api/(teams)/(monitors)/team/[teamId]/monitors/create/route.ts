@@ -1,6 +1,6 @@
 import { auth } from "@/utils/auth";
 import { NextRequest, NextResponse } from "next/server";
-import { type MonitorType } from "@repo/common/types";
+import { CheckFrequencyType, type MonitorType } from "@repo/common/types";
 import { monitorSchema } from "@repo/common/schemas";
 import { zodParser } from "@/utils/zodParser";
 import prisma from "@/utils/prisma";
@@ -66,16 +66,28 @@ export const POST = async (req: NextRequest, res: NextResponse) => {
     });
   
     if(monitor){
-      const queueResult = await HealthCheckQueue.add("HealthCheckJob", monitor);
+      const jobId = `HealthCheckJob-${monitor.id}`
+      const queueResult = await HealthCheckQueue.add(jobId, monitor, {
+         repeat: {
+            every: Number(checkFrequency)
+         },
+         jobId
+      });
+
+      // HealthCheckQueue.getJobs([""])
   
       console.log(`✅Monitor ${monitor.urlAlias} is added to the queue with job id: ${queueResult.id}`);
     }
   
     return NextResponse.json({
-       mesasge: `${monitor.urlAlias} Monitor created !`
+       message: `${monitor.urlAlias} Monitor created !`
     })
   } catch (error) {
     console.log(`❌ Error: `, error);
+    return NextResponse.json({
+      message: `Error while creating monitor`,
+      error
+   })
      
   }
   
