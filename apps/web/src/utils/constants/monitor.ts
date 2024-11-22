@@ -1,1 +1,0 @@
-export const CHECK_FREQUENCIES = ["30s","1m"] as const;
