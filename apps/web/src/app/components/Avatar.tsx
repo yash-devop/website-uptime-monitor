@@ -14,7 +14,7 @@ import React from "react";
 import { VariantProps } from "class-variance-authority";
 import { CreditCard, LogOut, Settings } from "lucide-react";
 import ClientSideLogoutButton from "./ClientSideLogoutButton";
-import prisma from "@/utils/prisma";
+import prisma from "@repo/db/prisma";
 import { generateUrlWithTeamId } from "./AppSidebar";
 
 type ElementProps = {

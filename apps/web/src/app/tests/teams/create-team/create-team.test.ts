@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, type Mock, vi } from "vitest";
 import { mockedPrismaClient } from "../../../__mocks__/prisma";
 import { auth } from "@/utils/auth";
 import { POST } from "@/app/api/(teams)/create-team/route";
-import prisma from "@/utils/prisma";
+import prisma from "@repo/db/prisma";
 import { createStripeCustomer } from "@/lib/stripe/customer";
 import { Prisma } from "@prisma/client";
 import { createMockHTTP } from "@/utils/helper";

@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { CheckFrequencyType, type MonitorType } from "@repo/common/types";
 import { monitorSchema } from "@repo/common/schemas";
 import { zodParser } from "@/utils/zodParser";
-import prisma from "@/utils/prisma";
+import prisma from "@repo/db/prisma";
 import { HealthCheckQueue } from "@/queues";
 
 export const POST = async (req: NextRequest, res: NextResponse) => {
