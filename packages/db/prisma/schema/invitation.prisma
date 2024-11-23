@@ -1,0 +1,17 @@
+model Invitation {
+  id          String   @id @default(cuid())
+  inviteToken String   @unique
+  inviteTo    String
+  inviterId   String
+  status      STATUS
+  invitedBy   User     @relation(fields: [inviterId], references: [id])
+  teamId      String
+  team        Team     @relation(fields: [teamId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum STATUS {
+  PENDING
+  ACCEPTED
+}

@@ -1,0 +1,37 @@
+model Team {
+  id                 String           @id @default(cuid())
+  teamName           String           @unique
+  stripe_customer_id String?
+  plan               Plans
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  invitations        Invitation[]
+  // relation
+  members            TeamMembership[]
+
+  Monitor Monitor[]
+}
+
+model TeamMembership {
+  id     String @id @default(cuid())
+  userId String
+  teamId String
+  role   Roles
+
+  user User @relation(fields: [userId], references: [id])
+  team Team @relation(fields: [teamId], references: [id])
+
+  // I gave combined unique field so that no same user can join the same team again and again.
+  // @@unique on userId and teamid means that it will combined and look them as unique.
+  @@unique([userId, teamId])
+}
+
+enum Roles {
+  OWNER
+  MEMBER
+}
+
+enum Plans {
+  FREE
+  PRO
+}

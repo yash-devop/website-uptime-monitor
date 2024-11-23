@@ -1,0 +1,39 @@
+model Monitor {
+  id                 String          @id @default(cuid())
+  url                String
+  urlAlias           String
+  alertWhen          URL_ALERT_TYPES @default(URL_BECOMES_UNAVAILABLE)
+  alertUsing         ALERT_USING     @default(email)
+  recoveryPeriod     Int
+  confirmationPeriod Int
+  checkFrequency     String // not an enum coz later will add more freqs. defined in /constants folder
+  httpMethods        HTTP_METHODS    @default(get)
+  httpRequestTimeout Int // in constants folder
+  httpRequestBody    String?
+  headerName         String?
+  headerValue        String?
+  regions            String[]
+
+  // connect monitor to team.
+  teamId String
+  team   Team   @relation(fields: [teamId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum URL_ALERT_TYPES {
+  URL_BECOMES_UNAVAILABLE
+  URL_DOESNT_HAVE_KEYWORD
+  URL_HAVE_KEYWORD
+}
+
+enum ALERT_USING {
+  email
+}
+
+enum HTTP_METHODS {
+  get
+  post
+  put
+}
