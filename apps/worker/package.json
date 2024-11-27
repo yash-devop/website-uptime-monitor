@@ -2,9 +2,10 @@
   "name": "worker",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "type": "module",
   "scripts": {
-    "dev": "tsc -b && node dist/worker.js",
+    "dev": "tsup --watch --onSuccess \"node dist/worker.cjs\"",
+    "build": "tsup",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -21,8 +22,9 @@
     "serverless-offline": "^14.3.4"
   },
   "devDependencies": {
-    "@repo/common": "*",
+    "@repo/db": "*",
     "@types/aws-lambda": "^8.10.145",
-    "@types/node": "^22.9.1"
+    "@types/node": "^22.9.1",
+    "tsup": "^8.0.2"
   }
 }
