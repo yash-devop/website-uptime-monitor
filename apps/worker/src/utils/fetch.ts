@@ -1,7 +1,7 @@
 // testing:
 // "https://wayback.archive.org/"     <---- load time is high.
 
-import { MonitorType } from "@repo/common/src/types";
+import { MonitorType } from "@repo/common";
 import { createHeaders } from "./customHeader";
 
 type FetcherProps = Omit<
@@ -13,10 +13,20 @@ type FetcherProps = Omit<
   | "recoveryPeriod"
   | "confirmationPeriod"
   | "checkFrequency"
->;
+  | "regions"
+> & {
+  currentRegion: string
+};
 
 
-
+type FetcherReturnType = {
+  success: boolean,
+  response?: Response,
+  error? :{
+    name: string,
+    cause: string
+  }
+}
 
 export async function fetcher({
   url,
@@ -24,8 +34,8 @@ export async function fetcher({
   httpRequestBody,
   headerName,
   headerValue,
-  httpRequestTimeout = "1200",
-}: FetcherProps) {
+  httpRequestTimeout = "1200"
+}: FetcherProps):Promise<FetcherReturnType> {
   const timeoutSignal = AbortSignal.timeout(Number(httpRequestTimeout));
 
   let customHeaders;
@@ -35,9 +45,7 @@ export async function fetcher({
         [headerName]: headerValue,
         "Content-Type": "application/json",
     })
-    console.log("Custom Header: ", {
-        headers: { ...customHeaders },
-    });
+
   }
 
   try {
@@ -47,23 +55,51 @@ export async function fetcher({
       headers: customHeaders ? { ...customHeaders } : {},
       signal: timeoutSignal,
     });
-    console.log('RESPONSEEEEE: ' , response);
-    return response;
+    return {
+      success: true,
+      response
+    };
   } catch (err) {
     const error = err as Error;
     if (error.name === "TimeoutError") {
       console.error(`Timeout: It took more than ${httpRequestTimeout} seconds to get the result!`);
-      throw err;
+      return {
+        success: false,
+        error:{
+          name: "HTTP Timeout",
+          cause: JSON.stringify(err)
+        }
+      }
     } else if (error.name === "AbortError") {
       console.error(
         "Fetch aborted by user action (browser stop button, closing tab, etc."
       );
-      throw err;
+      return {
+        success: false,
+        error:{
+          name: "HTTP Aborted",
+          cause: JSON.stringify(err)
+        }
+      }
     } else if (error.name === "TypeError") {
-      console.error(err);
+      console.error("DNS Failure" , err);
+      return {
+        success: false,
+        error:{
+          name: "DNS Failure",
+          cause: JSON.stringify(err)
+        }
+      }
     } else {
       // A network error, or some other problem.
       console.error(`Error: type: ${error}, message: ${error.message}`);
+      return {
+        success: false,
+        error:{
+          name: error.name,
+          cause: JSON.stringify(err)
+        }
+      }
     }
   }
 }
