@@ -1,0 +1,26 @@
+model Incident {
+    id             String          @id @default(cuid())
+    email          String?
+    incidentName   String
+    incidentCause  String
+    incidentStatus INCIDENT_STATUS
+    length         Int?
+    responseContent String?
+    acknowledgedAt DateTime?
+    acknowledgedBy String?
+    resolvedAt     DateTime?
+    resolvedBy     String?
+    createdAt      DateTime        @default(now())
+    updatedAt      DateTime        @updatedAt
+
+    monitorId      String          @unique
+    teamId         String          @unique
+    monitor        Monitor         @relation(fields: [monitorId], references: [id])
+    teamMembership TeamMembership  @relation(fields: [teamId] , references: [id])
+}
+
+enum INCIDENT_STATUS {
+    ongoing // if incident occured.
+    validating // if incident occured and changes made to the url , then after pinging , it changes to validating.
+    resolved // incident is resolved , it moves to resolved state.
+}

@@ -18,8 +18,10 @@ model Monitor {
   teamId String
   team   Team   @relation(fields: [teamId], references: [id])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  CheckLog  CheckLog[]
+  Incident Incident[]
 }
 
 enum URL_ALERT_TYPES {

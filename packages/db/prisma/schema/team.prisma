@@ -20,7 +20,7 @@ model TeamMembership {
 
   user User @relation(fields: [userId], references: [id])
   team Team @relation(fields: [teamId], references: [id])
-
+  incident Incident[]
   // I gave combined unique field so that no same user can join the same team again and again.
   // @@unique on userId and teamid means that it will combined and look them as unique.
   @@unique([userId, teamId])

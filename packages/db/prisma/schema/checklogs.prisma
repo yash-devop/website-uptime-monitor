@@ -1,0 +1,22 @@
+model CheckLog {
+  id           String     @id @default(cuid())
+  region       String
+  responseTime Int
+  headers      String?
+  statusCode   Int?
+  isUp         Boolean
+  webStatus    WEB_STATUS
+  down_at      DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  // have checklog for each monitor
+
+  monitorId String  @unique
+  Monitor   Monitor @relation(fields: [monitorId], references: [id])
+}
+
+enum WEB_STATUS {
+  up
+  down
+}
