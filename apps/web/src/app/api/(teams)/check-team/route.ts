@@ -1,5 +1,5 @@
 import { auth } from "@/utils/auth";
-import prisma from "@repo/db/prisma";
+import {prisma} from "@repo/db";
 import { NextRequest, NextResponse } from "next/server";
 
 export const POST = async (req: NextRequest,res:NextResponse) => {

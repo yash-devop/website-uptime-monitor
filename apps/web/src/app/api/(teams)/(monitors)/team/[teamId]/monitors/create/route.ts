@@ -1,9 +1,9 @@
 import { auth } from "@/utils/auth";
 import { NextRequest, NextResponse } from "next/server";
-import { CheckFrequencyType, type MonitorType } from "@repo/common/types";
-import { monitorSchema } from "@repo/common/schemas";
+import { CheckFrequencyType, type MonitorType } from "@repo/common";
+import { monitorSchema } from "@repo/common";
 import { zodParser } from "@/utils/zodParser";
-import prisma from "@repo/db/prisma";
+import {prisma} from "@repo/db";
 import { HealthCheckQueue } from "@/queues";
 
 export const POST = async (req: NextRequest, res: NextResponse) => {
