@@ -1,7 +1,7 @@
 import { z } from "zod";
 // import { type MonitorType , CheckFrequencyType } from "@repo/common";
-import { ALERT_USING, HTTP_METHODS, URL_ALERT_TYPES } from "@prisma/client";
-import { CHECK_FREQUENCIES } from "../constants/index";
+import { ALERT_USING, HTTP_METHODS, URL_ALERT_TYPES } from "@repo/db";
+import { CHECK_FREQUENCIES } from "../constants/monitor";
 
 // Team Schema
 
