@@ -1,7 +1,7 @@
 model CheckLog {
   id           String     @id @default(cuid())
   region       String
-  responseTime Int
+  responseTime Int?
   headers      String?
   statusCode   Int?
   isUp         Boolean
