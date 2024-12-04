@@ -1,7 +1,7 @@
 import { createStripeCustomer } from "@/lib/stripe/customer";
 import { auth } from "@/utils/auth";
 import { getUniqueTeamName } from "@/utils/getUniqueTeamName";
-import prisma from "@repo/db/prisma";
+import {prisma} from "@repo/db";
 import { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { z, ZodError } from "zod";
