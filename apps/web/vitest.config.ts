@@ -8,7 +8,9 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src')
+      '@': path.resolve(__dirname, './src'),
+      "@repo/db": path.resolve(__dirname, "../../packages/db/dist/client.d.ts"),      // we resolve the @repo/db imported from packages/db.
+      "@repo/common": path.resolve(__dirname, "../../packages/common/src/index.ts")     
     },
   },
 })
