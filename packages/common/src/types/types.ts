@@ -11,7 +11,7 @@ export type MonitorType = {
   confirmationPeriod: number;
   checkFrequency: CheckFrequencyType; // not an enum coz later will add more freqs. defined in /constants folder
   httpMethods: HTTP_METHODS;
-  httpRequestTimeout: string; // in constants folder
+  httpRequestTimeout: number; // in constants folder
   httpRequestBody?: string;
   headerName?: string;
   headerValue?: string;
