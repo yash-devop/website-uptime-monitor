@@ -15,7 +15,6 @@ import { VariantProps } from "class-variance-authority";
 import { CreditCard, LogOut, Settings } from "lucide-react";
 import ClientSideLogoutButton from "./ClientSideLogoutButton";
 import {prisma} from "@repo/db";
-import { generateUrlWithTeamId } from "./AppSidebar";
 
 type ElementProps = {
   name: string;
@@ -33,6 +32,9 @@ type ModifiedTeam = {
 }[];
 
 export default async function Avatar() {
+  function generateUrlWithTeamId(path: string, teamId: string) {
+    return `/dashboard/team/${teamId}${path}`;
+  }
   const session = await auth();
   const user = session?.user;
   const userImage = user?.image;
@@ -53,6 +55,7 @@ export default async function Avatar() {
       },
     },
   });
+
   const revampedTeams: ModifiedTeam = teams.map((team) => {
     return {
       name: team.teamName,
@@ -60,7 +63,6 @@ export default async function Avatar() {
       url: generateUrlWithTeamId("/monitors", team.id),
     };
   });
-  console.log("teams", revampedTeams);
 
   const allElements: DropdownElementProps = {
     quickAccess: revampedTeams,
@@ -77,6 +79,7 @@ export default async function Avatar() {
       { name: "Sign out", variant: "destructive", icon: <LogOut />, url: "" },
     ],
   };
+
   // const allElements: DropdownElementProps = {
   //   quickAccess: [
   //     { name: "Team Valo", variant: "ghost" , url: "#" },
