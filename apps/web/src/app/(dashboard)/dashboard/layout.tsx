@@ -14,8 +14,8 @@ export default function DashboardLayout({
 }) {
   const BREADCRUMB_HEADER_HEIGHT = "45px"
   const cookieStore = cookies()
-  const teamSlug = cookieStore.get("team-slug")?.value
   const pathname = headers().get("x-current-path")!;
+  const teamSlug = cookieStore.get("team-slug")?.value ?? pathname.split("/")[3]
 
   const teamRoute = '/dashboard/team';
   const breadcrumbConfig: BreadcrumbElements = {
@@ -44,7 +44,8 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen h-full w-full overflow-auto">
       <SidebarProvider>
-        <AppSidebar />
+        <AppSidebar/>
+        {/* <AppSidebar pathname={pathname} teamId={teamSlug}/> */}
         <main className="w-full">
           <div className="p-2">
             <ClientSideTriggerButton />
