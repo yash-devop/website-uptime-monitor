@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@repo/db/prisma";
+import { prisma }from "@repo/db";
 import { auth } from "@/utils/auth";
 import { verify } from "jsonwebtoken";
 
