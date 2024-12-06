@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Providers from "./providers";
 import {Inter} from 'next/font/google'
-
+import { Toaster } from 'sonner';
 const inter = Inter({
    subsets: ["latin"],
    display: "swap",
@@ -26,6 +26,7 @@ export default function RootLayout({
       >
         <Providers>
           {children}
+          <Toaster/>
         </Providers>
       </body>
     </html>
