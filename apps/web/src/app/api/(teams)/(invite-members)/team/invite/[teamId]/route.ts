@@ -58,15 +58,18 @@ export const POST = async (
   }
 
   const { emailIds } = data;
+
   try {
     emailIds.forEach(async (email) => {
       // create a invite-token
+      console.log('emailIds: ', email);
       const inviteToken = generateAuthToken({
         payload: {
           email,
+          teamId
         },
         secret: process.env.INVITE_SECRET!,
-        TTL: "120000", // 120000ms means 2min.
+        TTL: (1000*60*10).toString(), // 120000ms means 2min.
       });
 
       console.log("Token is :", inviteToken);
@@ -91,14 +94,15 @@ export const POST = async (
           team: true,
         },
       });
+      console.log('invitation: ', invitation);
 
       if (invitation) {
         const {
-          invitedBy: { name, email, image },
+          invitedBy: { name, image },
           team: { teamName },
         } = invitation;
 
-        const REDIRECT_JOIN_URL = `${BASE_URL}/join?token=${btoa(inviteToken)}`;
+        const REDIRECT_JOIN_URL = `${BASE_URL}/join/${teamId}?token=${btoa(inviteToken)}`;
         await sendEmail({
           from: "controlweb.dev@gmail.com",
           html: await render(
@@ -112,7 +116,7 @@ export const POST = async (
           subject: `${
             name!.charAt(0).toUpperCase() + name!.substring(1)
           } has invited you to join ${teamName}`,
-          to: emailIds,
+          to: email,
         });
       }
     });
