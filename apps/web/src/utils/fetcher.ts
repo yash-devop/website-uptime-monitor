@@ -1,4 +1,4 @@
-interface FetchError extends Error {
+export interface FetchError extends Error {
     statusCode: number,
     info: any
 }
