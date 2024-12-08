@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { CheckFrequencyType, type MonitorType } from "@repo/common";
 import { monitorSchema } from "@repo/common";
 import { zodParser } from "@/utils/zodParser";
-import {prisma} from "@repo/db";
+import { prisma } from "@repo/db";
 import { HealthCheckQueue } from "@/queues";
 
 export const POST = async (req: NextRequest, res: NextResponse) => {
@@ -23,9 +23,8 @@ export const POST = async (req: NextRequest, res: NextResponse) => {
   } catch (error) {
     return NextResponse.json({
       error,
-    });
+    },{status: 403});
   }
-
 
   const {
     teamId,
@@ -41,54 +40,60 @@ export const POST = async (req: NextRequest, res: NextResponse) => {
     headerValue,
     httpMethods,
     httpRequestBody,
-    regions
+    regions,
   } = data;
-    // create a monitor:
+  // create a monitor:
 
   try {
     const monitor = await prisma.monitor.create({
       data: {
-          url,
-          alertUsing,
-          checkFrequency,
-          confirmationPeriod,
-          httpRequestTimeout,
-          recoveryPeriod,
-          urlAlias,
-          alertWhen,
-          headerName,
-          headerValue,
-          httpMethods,
-          httpRequestBody,
-          regions,
-          teamId
+        url,
+        alertUsing,
+        checkFrequency,
+        confirmationPeriod,
+        httpRequestTimeout,
+        recoveryPeriod,
+        urlAlias,
+        alertWhen,
+        headerName,
+        headerValue,
+        httpMethods,
+        httpRequestBody,
+        regions,
+        teamId,
       },
     });
-  
-    if(monitor){
-      const jobId = `HealthCheckJob-${monitor.id}`
-      const queueResult = await HealthCheckQueue.add(jobId, monitor, {
-         repeat: {
-            every: Number(checkFrequency)
-         },
-         jobId
+
+    console.log('Monitor created: ', monitor);
+
+    if (monitor) {
+      const jobId = `HealthCheckJob-${monitor.id}`;
+      const immediateJob = await HealthCheckQueue.add(jobId, monitor, {     // created to executed that monitor ASAP.
+        delay: 0,
+        jobId,     
+      });
+      const repeatableJob = await HealthCheckQueue.add(jobId, monitor, {  // then add repeatable checkFrequencies.
+        repeat: {
+          every: Number(checkFrequency),
+        },
+        jobId,    // if something went wrong related to the ids , then note that here we overide the default id... revert back if need ( it will then give ids like => repeat:id)
       });
 
       // HealthCheckQueue.getJobs([""])
-  
-      console.log(`✅Monitor ${monitor.urlAlias} is added to the queue with job id: ${queueResult.id}`);
+      console.log('immediateJob',immediateJob);
+      console.log(
+        `✅Monitor ${monitor.urlAlias} is added to the queue with immediateJob id of ${immediateJob.id} and Repeatablejob id: ${repeatableJob.id}`
+      );
     }
-  
+
     return NextResponse.json({
-       message: `${monitor.urlAlias} Monitor created !`
-    })
+      message: `${monitor.urlAlias} Monitor created !`,
+    });
   } catch (error) {
     console.log(`❌ Error: `, error);
     return NextResponse.json({
       message: `Error while creating monitor`,
-      error
-   })
-     
+      error,
+    });
   }
-  
 };
