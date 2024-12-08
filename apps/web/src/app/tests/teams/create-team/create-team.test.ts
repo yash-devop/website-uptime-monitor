@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, type Mock, vi } from "vitest";
 import { mockedPrismaClient } from "../../../__mocks__/prisma";
 import { auth } from "@/utils/auth";
 import { POST } from "@/app/api/(teams)/create-team/route";
-import prisma from "@repo/db/prisma";
+import { prisma } from "@repo/db";
 import { createStripeCustomer } from "@/lib/stripe/customer";
 import { Prisma } from "@prisma/client";
 import { createMockHTTP } from "@/utils/helper";
@@ -12,14 +12,19 @@ beforeEach(() => {
 });
 
 // 1. Mocks
+
+// a) Mocking auth from next auth
 vi.mock("../../../../utils/auth.ts", () => ({
   __esModule: true,
   auth: vi.fn(),
 }));
+// b) Mocking Prisma Client from @repo/db ( shared prisma in packages/db )
 
-vi.mock("@/utils/prisma", () => ({
-  default: mockedPrismaClient,
+vi.mock("@repo/db", () => ({      // we resolve the @repo/db imported from packages/db.
+  prisma: mockedPrismaClient,     //  If export const prisma, mock with { prisma: mockedPrismaClient } & If export default prisma, mock with { default: mockedPrismaClient }
 }));
+
+// c) Mocking Stripe create customer 
 vi.mock("../../../../lib/stripe/customer.ts", () => ({
   createStripeCustomer: vi.fn(),
 }));
@@ -35,7 +40,7 @@ describe("POST /create-team API", () => {
     it("should send unauthorized user", async () => {
       (auth as Mock).mockResolvedValueOnce(null);
 
-      const {req,res} = createMockHTTP({
+      const { req, res } = createMockHTTP({
         method: "POST",
         body: {},
       });
@@ -54,7 +59,7 @@ describe("POST /create-team API", () => {
           id: "1",
         },
       });
-      const {req,res} = createMockHTTP({
+      const { req, res } = createMockHTTP({
         method: "POST",
         body: async () => ({
           teamName: "Team Testing",
@@ -82,7 +87,7 @@ describe("POST /create-team API", () => {
           id: "1",
         },
       });
-      const {req,res} = createMockHTTP({
+      const { req, res } = createMockHTTP({
         method: "POST",
         body: async () => ({
           // teamName: "",
@@ -110,7 +115,7 @@ describe("POST /create-team API", () => {
           id: "1",
         },
       });
-      const {req,res} = createMockHTTP({
+      const { req, res } = createMockHTTP({
         method: "POST",
         body: async () => ({
           // teamName: "",
@@ -160,7 +165,7 @@ describe("POST /create-team API", () => {
 
       (prisma.team.update as Mock).mockResolvedValue({});
 
-      const {req,res} = createMockHTTP({
+      const { req, res } = createMockHTTP({
         method: "POST",
         body: {
           teamName,
@@ -218,7 +223,7 @@ describe("POST /create-team API", () => {
 
       (prisma.team.update as Mock).mockResolvedValue({});
 
-      const {req,res} = createMockHTTP({
+      const { req, res } = createMockHTTP({
         method: "POST",
         body: {
           teamName,
@@ -252,20 +257,20 @@ describe("POST /create-team API", () => {
           id: "1",
         },
       });
-    
+
       // Simulate a unique constraint violation
       (prisma.team.create as Mock).mockRejectedValueOnce(
         new Prisma.PrismaClientKnownRequestError(
-          "Unique constraint failed on the fields: (`teamName`)", 
-          { 
-            code: 'P2002', 
-            meta: { target: ['teamName'] }, 
-            clientVersion: ""
+          "Unique constraint failed on the fields: (`teamName`)",
+          {
+            code: "P2002",
+            meta: { target: ["teamName"] },
+            clientVersion: "",
           }
         )
       );
-    
-      const {req,res} = createMockHTTP({
+
+      const { req, res } = createMockHTTP({
         method: "POST",
         body: {
           teamName,
@@ -275,24 +280,30 @@ describe("POST /create-team API", () => {
           "Content-Type": "application/json",
         },
       });
-    
+
       const response = await POST(req, res);
       const data = await response.json();
-    
+
       // Check that the response is 500 and has the correct message
       expect(response.status).toBe(500);
       expect(data).toEqual({
         message: "Unique constraint failed on the fields: (`teamName`)",
-        metaData: { target: ['teamName'] }, // Add whatever metadata you need to verify
-        prismaCode: 'P2002',
+        metaData: { target: ["teamName"] }, // Add whatever metadata you need to verify
+        prismaCode: "P2002",
       });
     });
     it("should return 500 if createStripeCustomer fails", async () => {
       (auth as Mock).mockResolvedValue({ user: { id: "1" } });
-      (prisma.team.create as Mock).mockResolvedValue({ id: teamId, plan: "FREE", teamName: teamName });
-      (createStripeCustomer as Mock).mockRejectedValue(new Error("Stripe error"));
-    
-      const {req,res} = createMockHTTP({
+      (prisma.team.create as Mock).mockResolvedValue({
+        id: teamId,
+        plan: "FREE",
+        teamName: teamName,
+      });
+      (createStripeCustomer as Mock).mockRejectedValue(
+        new Error("Stripe error")
+      );
+
+      const { req, res } = createMockHTTP({
         method: "POST",
         body: {
           teamName,
@@ -302,13 +313,13 @@ describe("POST /create-team API", () => {
           "Content-Type": "application/json",
         },
       });
-    
+
       const response = await POST(req, res);
       const data = await response.json();
-    
+
       expect(response.status).toBe(500);
       expect(data).toStrictEqual({
-        message: 'Stripe error'
+        message: "Stripe error",
       });
     });
   });
