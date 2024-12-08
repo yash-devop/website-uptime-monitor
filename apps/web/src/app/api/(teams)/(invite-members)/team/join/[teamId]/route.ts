@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma }from "@repo/db";
+import { prisma } from "@repo/db";
 import { auth } from "@/utils/auth";
 import { verify } from "jsonwebtoken";
+import { z } from "zod";
+import { zodParser } from "@/utils/zodParser";
 
 export interface UserPayloadJWT {
-  emailId: string;
+  email: string;
+  teamId: string
 }
+
+const teamSchema = z.object({
+  inviteToken: z.string(),
+});
 
 export const POST = async (
   req: NextRequest,
@@ -18,47 +25,52 @@ export const POST = async (
       { status: 401 }
     );
   }
-
-  const body = await req.json().catch(() => null);
-  if (!body || !body.inviteToken) {
+  let data;
+  try {
+    data = await zodParser(teamSchema, req);
+  } catch (error) {
     return NextResponse.json(
-      { message: "Please provide an invite token." },
-      { status: 400 }
+      {
+        error,
+      },
+      { status: 403 }
     );
   }
 
-  const { inviteToken } = body;
+  const { inviteToken } = data;
 
   const decodedToken = atob(inviteToken);
-  console.log('decodedTOken', decodedToken);
+  console.log("decodedTOken", decodedToken);
   let decodedEmailId;
   try {
     const verified = verify(decodedToken, process.env.INVITE_SECRET!, {
       complete: true,
     }).payload as UserPayloadJWT;
-    const { emailId } = verified;
-    decodedEmailId = emailId;
+    console.log('verified:',verified);
+    const { email } = verified;
+    console.log('emailId:' ,email);
+    decodedEmailId = email;
   } catch {
     return NextResponse.json(
-      { message: "Invalid or expired invite token." },
+      { message: "Invalid or expired invite token.", code: "INVALID" },
       { status: 401 }
-    );
+    )
   }
 
   const invitation = await prisma.invitation.findFirst({
     where: {
-      AND:{
+      AND: {
         inviteToken: decodedToken,
         teamId,
-      }
+      },
     },
   });
 
-  console.log('invitation: ', invitation);
+  console.log("Data after decoding: ", decodedEmailId);
 
   if (!invitation) {
     return NextResponse.json(
-      { message: "Invitation not found!" },
+      { message: "Invitation not found!", code: "NOT_FOUND" },
       { status: 404 }
     );
   }
@@ -68,12 +80,45 @@ export const POST = async (
   });
 
   if (!user) {
-    // return NextResponse.json(
-    //   { message: `User with email ${decodedEmailId} not found.` },
-    //   { status: 404 }
-    // );
-    return NextResponse.redirect("https://youtube.com",{status: 301})
+    // return NextResponse.redirect(new URL("/login", req.url));
+    return NextResponse.json(
+      { message: `User with email ${decodedEmailId} not found.` , code: "USER_NOT_FOUND" },
+      { status: 307 }
+    );
+    // return NextResponse.redirect("https://youtube.com", { status: 301 });
   }
+
+  console.log('HELLO');
+  console.log('user: ', user);
+
+  // still PENDING ?
+  if (invitation.status !== "PENDING") {
+    return NextResponse.json(
+      { message: "Invitation already accepted", code: "ALREADY_ACCEPTED" },
+      { status: 400 }
+    );
+  }
+
+  // const userInTeam = await prisma.teamMembership.findFirst({
+  //   where:{
+  //     userId: user.id
+  //   },
+  //   select:{
+  //     team:{
+  //       select:{
+  //         teamName: true,
+  //       }
+  //     }
+  //   }
+  // })
+
+  // if(userInTeam){
+  //   return NextResponse.json(
+  //     { message: `User is already present in the ${userInTeam.team.teamName}` , code: "ALREADY_PRESENT"},
+  //     { status: 400 }
+  //   );
+  // }
+
 
   try {
     await prisma.teamMembership.create({
@@ -89,10 +134,10 @@ export const POST = async (
       data: { status: "ACCEPTED" },
     });
 
-    return NextResponse.json({ message: "You successfully joined the team!" });
+    return NextResponse.json({ message: "You successfully joined the team!" , code: "SUCCESS" });
   } catch (error) {
     return NextResponse.json(
-      { message: "Failed to join the team.", error: (error as Error).message },
+      { message: "Failed to join the team.", error: (error as Error).message, code: "FAILED_TO_JOIN" },
       { status: 500 }
     );
   }
