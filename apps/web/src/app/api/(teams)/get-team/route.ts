@@ -1,5 +1,5 @@
 import { auth } from "@/utils/auth";
-import {prisma} from "@repo/db";
+import { prisma } from "@repo/db";
 import { NextRequest, NextResponse } from "next/server";
 
 export const GET = async (req: NextRequest) => {
@@ -18,17 +18,54 @@ export const GET = async (req: NextRequest) => {
   const teams = await prisma.team.findMany({
     where: {
       members: {
-        some: { userId : session.user.id },
+        some: { userId: session?.user?.id },
       },
     },
     include: {
       members: {
         include: {
-          user: true,
+          user: {
+            select: {
+              name: true,
+              email: true,
+              image: true,
+            },
+          },
         },
       },
+      invitations:{
+        where:{
+          status: "PENDING"
+        },
+        select:{
+          inviterId: true,
+          invitedBy: {
+            select:{
+              name: true,
+              email: true,
+              image: true
+            }
+          },
+          inviteTo: true,
+          status: true
+        }
+      }
     },
   });
+  // const teams = await prisma.team.findMany({
+  //   where: {
+  //     members: {
+  //       some: { userId : session.user.id },
+  //     },
+  //   },
+  //   include: {
+  //     members: {
+  //       include: {
+  //         user: true,
+  //       },
+  //     },
+  //   },
+  // });
   return NextResponse.json({
     data: teams,
   });
