@@ -22,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.className} antialiased tracking-[-0.022em;]`}
+        className={`${inter.className} antialiased tracking-[-0.022em;] selection:text-green-3 selection:bg-green-5`}
       >
         <Providers>
           {children}
