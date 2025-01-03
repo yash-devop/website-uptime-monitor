@@ -17,7 +17,17 @@ services:
         interval: 10s
         timeout: 5s
         retries: 5
+    redis:
+      image: redis
+      container_name: website-uptime-redis
+      restart: always
+      ports:
+        - 6379:6379
+      volumes:
+        - redis-data:/data
 
 volumes:
   postgres-data:
+    external: false
+  redis-data:
     external: false
