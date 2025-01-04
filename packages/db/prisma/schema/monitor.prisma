@@ -21,7 +21,7 @@ model Monitor {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   CheckLog  CheckLog[]
-  Incident Incident[]
+  Incident  Incident[]
 }
 
 enum URL_ALERT_TYPES {
