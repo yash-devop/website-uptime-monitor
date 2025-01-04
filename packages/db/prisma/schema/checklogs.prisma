@@ -7,12 +7,13 @@ model CheckLog {
   isUp         Boolean
   webStatus    WEB_STATUS
   down_at      DateTime?
+  up_at        DateTime?
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
   // have checklog for each monitor
 
-  monitorId String  @unique
+  monitorId String
   Monitor   Monitor @relation(fields: [monitorId], references: [id])
 }
 
