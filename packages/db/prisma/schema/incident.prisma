@@ -1,6 +1,7 @@
 model Incident {
     id             String          @id @default(cuid())
     email          String?
+    url            String
     incidentName   String
     incidentCause  String
     incidentStatus INCIDENT_STATUS
@@ -10,13 +11,15 @@ model Incident {
     acknowledgedBy String?
     resolvedAt     DateTime?
     resolvedBy     String?
+    down_at        DateTime?
     createdAt      DateTime        @default(now())
     updatedAt      DateTime        @updatedAt
 
-    monitorId      String          @unique
-    teamId         String          @unique
+    monitorId      String          
+    teamId         String          
     monitor        Monitor         @relation(fields: [monitorId], references: [id])
-    teamMembership TeamMembership  @relation(fields: [teamId] , references: [id])
+    // teamMembership TeamMembership  @relation(fields: [teamId] , references: [id])
+    team          Team  @relation(fields: [teamId] , references: [id])
 }
 
 enum INCIDENT_STATUS {
