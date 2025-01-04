@@ -66,11 +66,6 @@ module.exports.handler  = async (
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        dataWeGot: {
-          url: url ?? null,
-          event: event.monitorData ?? null,
-          currentRegion
-        },
         success,
         message: "Lambda Response ❌",
         region: currentRegion,
@@ -80,8 +75,10 @@ module.exports.handler  = async (
           isUp: false,
           webStatus,
           down_at,
-          errorName: error?.name,
-          errorCause: error?.cause
+          error: {
+            name: error?.name,
+            cause: error?.cause
+          }
         },
       }),
     };
@@ -96,11 +93,6 @@ module.exports.handler  = async (
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      dataWeGot: {
-        url: url ?? null,
-        event: event.monitorData ?? null,
-        currentRegion
-      },
       success,
       message: "Lambda Response ✅",
       region: currentRegion,
