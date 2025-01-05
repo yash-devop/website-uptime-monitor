@@ -113,8 +113,15 @@ function TeamInvitationMember({ inviteTo, status }: TeamInvitationMemberProps) {
   );
 }
 
-export default async function TeamsPage() {
-  const teamId = cookies().get("team-slug")?.value;
+export default async function TeamsPage({
+  params
+}:{
+  params: Promise<{
+    teamId: string
+  }>
+}) {
+  // const {} = await params; 
+  const teamId = cookies().get("team-slug")?.value ?? (await params).teamId;
   console.log("teamId: ", teamId);
   const session = await auth();
 
