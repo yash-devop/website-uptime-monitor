@@ -71,8 +71,31 @@ const worker = new Worker(
         JSON.parse(new TextDecoder("utf-8").decode(response.Payload)).body
       ) as ResultResponse;
 
-      const { url, down_at, isUp, error } = websiteStatus.data;
+      const {
+        url,
+        down_at,
+        isUp,
+        error,
+        responseTime,
+        webStatus,
+        headers,
+        statusCode,
+      } = websiteStatus.data;
+      const { region } = websiteStatus;
 
+      await prisma.checkLog.create({
+        data: {
+          isUp,
+          region,
+          responseTime,
+          webStatus,
+          down_at: isUp ? null : down_at,
+          up_at: isUp ? new Date() : null,
+          headers: JSON.stringify(headers),
+          statusCode,
+          monitorId: monitorData.id,
+        },
+      });
       const teamExists = await prisma.team.findUnique({
         where: { id: monitorData.teamId },
         include: {
@@ -107,6 +130,14 @@ const worker = new Worker(
             where: { id: currentIncident.id },
             data: { incidentStatus: "ongoing" },
           });
+          await prisma.monitor.update({
+            data:{
+              status: "down"
+            },
+            where:{
+              id: monitorData.id
+            }
+          })
 
           console.log("🔄 Status updated from validating to ongoing");
           const {
@@ -135,6 +166,14 @@ const worker = new Worker(
             where: { id: currentIncident.id },
             data: { incidentStatus: "resolved", resolvedAt: new Date() },
           });
+          await prisma.monitor.update({
+            data:{
+              status: "up"
+            },
+            where:{
+              id: monitorData.id
+            }
+          })
 
           console.log("✅ Status updated from validating to resolved");
           const {
@@ -177,7 +216,14 @@ const worker = new Worker(
                 down_at,
               },
             });
-
+          await prisma.monitor.update({
+            data: {
+              status: "down",
+            },
+            where: {
+              id: monitorData.id,
+            },
+          });
           console.log("⚠️ New incident created (ongoing)");
           const startedAt = getPrettyDate(createdAt);
           await notifyIncidentToTeam(
@@ -216,7 +262,14 @@ const worker = new Worker(
           } = currentIncident;
 
           const startedAt = getPrettyDate(createdAt);
-
+          await prisma.monitor.update({
+            data: {
+              status: "up",
+            },
+            where: {
+              id: monitorData.id,
+            },
+          });
           await notifyIncidentToTeam(
             teamId,
             id,
