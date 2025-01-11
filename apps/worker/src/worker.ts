@@ -1,23 +1,19 @@
-import { ConnectionOptions, Job, Queue, Worker } from "bullmq";
+import { ConnectionOptions, Job, Worker } from "bullmq";
 import { invokeLambda } from "./invokeLambda";
 import { MonitorType } from "@repo/common";
 import { config } from "dotenv";
 import { prisma } from "@repo/db";
-config();
-import redis, { createClient, RedisClientType } from "redis";
-// import { InvokeCommandOutput } from "@aws-sdk/client-lambda";
+import { createClient } from "redis";
+import { getPrettyDate, notifyIncidentToTeam } from "./utils";
+import { format } from "date-fns";
+config({ path: "../.env" });
 
-console.log("WORKING");
+console.log("Worker is running...");
 
 const connection: ConnectionOptions = {
   host: "localhost",
   port: 6379,
 };
-type redisType = RedisClientType<
-  redis.RedisModules,
-  redis.RedisFunctions,
-  redis.RedisScripts
->;
 
 type ResultResponse = {
   region: string;
@@ -37,8 +33,6 @@ type ResultResponse = {
   };
 };
 
-// const localRedis = createClient(); // TODO: In production , use upstash and in Development use Local redis.
-// let client: redisType;
 const createRedisClient = () => {
   if (process.env.NODE_ENV === "production") {
     return createClient({ url: process.env.UPSTASH_REDIS_URL });
@@ -52,7 +46,7 @@ const client = createRedisClient();
     await client.connect();
   } catch (err) {
     console.error("Failed to connect to Redis:", err);
-    process.exit(1); // Exit the process if Redis fails to connect
+    process.exit(1);
   }
 })();
 
@@ -60,8 +54,9 @@ const worker = new Worker(
   "HealthCheckQueue",
   async (job: Job) => {
     const monitorData: MonitorType & { id: string } = job.data;
-    console.log('monitorData',monitorData);
+    console.log("monitorData", monitorData);
     const REGIONS = ["ap-south-1"];
+
     const AWS_RESPONSE = await Promise.all(
       REGIONS.map((region) =>
         invokeLambda(region, {
@@ -71,93 +66,106 @@ const worker = new Worker(
       )
     );
 
-    const parsedResponses = AWS_RESPONSE.map(async (response) => {
+    AWS_RESPONSE.map(async (response) => {
       const websiteStatus = JSON.parse(
         JSON.parse(new TextDecoder("utf-8").decode(response.Payload)).body
       ) as ResultResponse;
 
-      const {
-        url,
-        responseTime,
-        down_at,
-        headers,
-        isUp,
-        statusCode,
-        webStatus,
-        success,
-        error,
-      } = websiteStatus.data;
-      console.log('websiteStatus.data',websiteStatus.data);
-
-      const region = websiteStatus.region;
+      const { url, down_at, isUp, error } = websiteStatus.data;
 
       const teamExists = await prisma.team.findUnique({
-        where: { id: monitorData.teamId }
+        where: { id: monitorData.teamId },
+        include: {
+          members: {
+            include: {
+              user: {
+                select: { name: true, email: true },
+              },
+            },
+          },
+        },
       });
-      console.log('TeamExists',teamExists);
-      
       if (!teamExists) {
         throw new Error(`Team with ID ${monitorData.teamId} does not exist`);
       }
-      
-      // Fetch the current state from the database
-      let dbState;
-      try {
-        dbState = await prisma.checkLog.findFirst({
-          where: {
-            monitorId: monitorData.id,
-            region,
-          },
-        });
-      } catch (error) {
-        console.error("❌ ERROR fetching CheckLog from DB: ", error);
-        return;
-      }
 
-      // If there's no existing state, create a new one
-      if (!dbState) {
-        try {
-          await prisma.checkLog.create({
-            data: {
-              isUp,
-              region,
-              responseTime,
-              webStatus,
-              down_at: isUp ? null : down_at,
-              up_at: isUp ? new Date() : null,
-              headers: JSON.stringify(headers),
-              statusCode,
-              monitorId: monitorData.id,
-            },
-          });
+      const currentIncident = await prisma.incident.findFirst({
+        where: {
+          monitorId: monitorData.id,
+          incidentStatus: { in: ["ongoing", "validating"] },
+        },
+        include: {
+          team: { include: { members: { include: { user: true } } } },
+        },
+      });
 
-          if (!isUp) {
-            console.log("⚠️ Initial state is DOWN, creating incident");
-            await prisma.incident.create({
-              data: {
-                url,
-                incidentName: error!.name,
-                incidentCause: error!.cause,
-                incidentStatus: "ongoing",
-                monitorId: monitorData.id,
-                teamId: monitorData.teamId,
-                down_at,
-              },
-            });
-          }
-        } catch (error) {
-          console.error("❌ ERROR while creating initial CheckLog or Incident: ", error);
-        }
-        return;
-      }
-
-      // If there's a state transition, handle it
-      if (dbState.isUp !== isUp) {
-        console.log("✅ Transition Detected:", dbState.isUp, "→", isUp);
-
+      // Early return for "validating" status
+      if (currentIncident?.incidentStatus === "validating") {
         if (!isUp) {
-          console.log("⚠️ Website is DOWN");
-          try {
+          // Website is still down → move back to ongoing
+          await prisma.incident.update({
+            where: { id: currentIncident.id },
+            data: { incidentStatus: "ongoing" },
+          });
+
+          console.log("🔄 Status updated from validating to ongoing");
+          const {
+            teamId,
+            createdAt,
+            id,
+            incidentName,
+            incidentCause,
+            team: { members },
+          } = currentIncident;
+          const startedAt = getPrettyDate(createdAt);
+          await notifyIncidentToTeam(
+            teamId,
+            id,
+            monitorData.urlAlias,
+            members,
+            url,
+            incidentName,
+            "ongoing",
+            startedAt,
+            error!.cause ?? incidentCause
+          );
+        } else {
+          // Website is up → resolve the incident
+          await prisma.incident.update({
+            where: { id: currentIncident.id },
+            data: { incidentStatus: "resolved", resolvedAt: new Date() },
+          });
+
+          console.log("✅ Status updated from validating to resolved");
+          const {
+            teamId,
+            createdAt,
+            id,
+            incidentName,
+            incidentCause,
+            team: { members },
+          } = currentIncident;
+          const startedAt = getPrettyDate(createdAt);
+          await notifyIncidentToTeam(
+            teamId,
+            id,
+            monitorData.urlAlias,
+            members,
+            url,
+            incidentName,
+            "ongoing",
+            startedAt,
+            error!.cause ?? incidentCause
+          );
+        }
+        return; // Early return for "validating"
+      }
+
+      // Other cases (ongoing, no incident, resolved, or no changes)
+      if (!currentIncident) {
+        if (!isUp) {
+          // Creating a new incident if website is down
+          const { teamId, createdAt, id, incidentName, incidentCause } =
             await prisma.incident.create({
               data: {
                 url,
@@ -169,65 +177,66 @@ const worker = new Worker(
                 down_at,
               },
             });
-          } catch (error) {
-            console.error("❌ ERROR while creating Incident: ", error);
-          }
-        }
 
-        try {
-          await prisma.checkLog.create({
-            data: {
-              isUp,
-              region,
-              responseTime,
-              webStatus,
-              down_at: isUp ? null : down_at,
-              up_at: isUp ? new Date() : null,
-              headers: JSON.stringify(headers),
-              statusCode,
-              monitorId: monitorData.id,
-            },
-          });
-        } catch (error) {
-          console.error("❌ ERROR while creating CheckLog after transition: ", error);
+          console.log("⚠️ New incident created (ongoing)");
+          const startedAt = getPrettyDate(createdAt);
+          await notifyIncidentToTeam(
+            teamId,
+            id,
+            monitorData.urlAlias,
+            teamExists.members,
+            url,
+            incidentName,
+            "ongoing",
+            startedAt,
+            error!.cause ?? incidentCause
+          );
+        } else {
+          console.log("✅ Website is up and no incidents to update");
         }
         return;
       }
 
-      // No state transition, log current state
-      console.log("❌ No Transition:", dbState.isUp, "=", isUp);
-      try {
-        await prisma.checkLog.create({
-          data: {
-            isUp,
-            region,
-            responseTime,
-            webStatus,
-            down_at: dbState.down_at,
-            up_at: dbState.up_at,
-            headers: JSON.stringify(headers),
-            statusCode,
-            monitorId: monitorData.id,
-          },
-        });
-      } catch (error) {
-        console.error("❌ ERROR while logging current state: ", error);
+      if (currentIncident.incidentStatus === "ongoing") {
+        if (isUp) {
+          // Resolve the ongoing incident if website is back up
+          await prisma.incident.update({
+            where: { id: currentIncident.id },
+            data: { incidentStatus: "resolved", resolvedAt: new Date() },
+          });
+
+          console.log("✅ Ongoing incident resolved");
+          const {
+            teamId,
+            createdAt,
+            id,
+            incidentName,
+            incidentCause,
+            team: { members },
+          } = currentIncident;
+
+          const startedAt = getPrettyDate(createdAt);
+
+          await notifyIncidentToTeam(
+            teamId,
+            id,
+            monitorData.urlAlias,
+            members,
+            url,
+            incidentName,
+            "resolved",
+            startedAt,
+            error!.cause ?? incidentCause
+          );
+        } else {
+          console.log(
+            "🚨 Website is still down; ongoing incident remains unchanged"
+          );
+        }
+        return;
       }
 
-      // await prisma.incident.create({
-      //   data: {
-      //     url,
-      //     incidentName: error!.name,
-      //     incidentCause: error!.cause,
-      //     incidentStatus: "ongoing",
-      //     monitorId: monitorData.id,
-      //     teamId: "cm42kp9st0003zq8bocm5s104",
-      //     // teamId: monitorData.teamId,
-      //     down_at,
-      //   },
-      // });
-
-      // Publish the status to Redis
+      // Publishing to redis pub/sub
       try {
         const published = await client.publish(
           `HealthCheckJob-${monitorData.id}`,
@@ -246,9 +255,4 @@ const worker = new Worker(
 
 worker.on("completed", () => {
   console.log("I'm free now.");
-});
-
-
-worker.on("completed", () => {
-  console.log("Im free now.");
 });
