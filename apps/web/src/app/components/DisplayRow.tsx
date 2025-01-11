@@ -11,7 +11,7 @@ type IconGeneratorType =
       className?: string;
       heartBeatType: HeartBeatType;
     }
-  | { iconType: "fancy"; color?: string }
+  | { iconType: "fancy"; color?: string ; iconSize?:string }
   | { iconType: "disabled"; color?: string }
   | { iconType: "custom"; custom: React.ElementType };
 
@@ -130,7 +130,7 @@ export const IconGenerator = (props: IconGeneratorType) => {
               props.color
             )}
           >
-            <ShieldAlert size={20} className="shrink-0" />
+            <ShieldAlert size={20} className={cn(`shrink-0`,props.iconSize)} />
           </div>
         </>
       ) : iconType === "custom" ? (
