@@ -11,7 +11,6 @@ import {
   SidebarMenuItem,
 } from "./ui/sidebar";
 import { cn } from "@/lib/utils";
-import { Separator } from "./ui/separator";
 import { usePathname } from "next/navigation";
 import {
   Calendar,
@@ -72,7 +71,6 @@ export default function ClientSidebarContent() {
           <SidebarGroupLabel className="[&>svg]:size-auto py-8 justify-between">
             <Control variant="sm" className="text-green-2 pl-1" />
           </SidebarGroupLabel>
-          <Separator className="mb-2" />
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
               {items.map((item) => {
