@@ -114,9 +114,19 @@ export default async function Avatar() {
               </div>
             </div>
           ) : (
-            <div className="flex items-center justify-center bg-gray-100 rounded-full w-10 h-10">
+            <div className="w-fit flex items-center gap-2">
+              <div className="flex items-center justify-center bg-gray-100 rounded-full w-10 h-10">
               <span className="text-slate-700 font-bold">UN</span>
             </div>
+              <div className=" [&>p]:text-left truncate w-fit">
+                <p className="text-white font-medium text-sm">{userName}</p>
+                <div className="max-w-[180px] w-full truncate">
+                  <span className="text-xs">{userEmail}</span>
+                </div>
+              </div>
+            </div>
+            
+            
           )}
         </DropdownMenuTrigger>
         <DropdownMenuContent
