@@ -2,6 +2,7 @@ model Monitor {
   id                 String          @id @default(cuid())
   url                String
   urlAlias           String
+  status             WEB_STATUS?
   alertWhen          URL_ALERT_TYPES @default(URL_BECOMES_UNAVAILABLE)
   alertUsing         ALERT_USING     @default(email)
   recoveryPeriod     Int
