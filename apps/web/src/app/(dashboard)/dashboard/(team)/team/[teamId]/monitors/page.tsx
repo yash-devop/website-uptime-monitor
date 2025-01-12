@@ -37,8 +37,10 @@ export default async function MonitorPage({
         take: 1,
       },
     },
+    orderBy: {
+      createdAt: "desc",
+    },
   });
-
   return (
     <>
       <div className="w-full">
@@ -55,18 +57,29 @@ export default async function MonitorPage({
             {monitors.length > 0 ? (
               monitors.map(({ urlAlias, id, CheckLog }, idx) => (
                 // TODO: add isUp or monitorUp or down so to give color to the DisplayRow's Dot / fancy icon
-                <DisplayRow idx={idx} monitorId={id} pathname={pathname!} length={monitors.length}>
+                <DisplayRow
+                  idx={idx}
+                  monitorId={id}
+                  pathname={pathname!}
+                  length={monitors.length}
+                >
                   <DisplayRowLeftSection className="gap-9">
                     <DisplayLeftElement>
                       <IconGenerator
                         iconType={CheckLog.length > 0 ? "dot" : "dot"}
                         heartBeatType={"once"}
-                        className={CheckLog.length > 0 ? (CheckLog[0].webStatus === "down" ? "bg-red-400 text-red-400" : "") : "bg-neutral-5 text-neutral-5" }
+                        className={
+                          CheckLog.length > 0
+                            ? CheckLog[0].webStatus === "down"
+                              ? "bg-red-400 text-red-400"
+                              : ""
+                            : "bg-neutral-5 text-neutral-5"
+                        }
                       />
                     </DisplayLeftElement>
                     <DisplayLeftElement>
                       <div className="flex flex-col">
-                        <h2 className="text-sm">{"name"}</h2>
+                        <h2 className="text-sm">{urlAlias}</h2>
                         <p className="text-neutral-3 text-xs">
                           <span className="text-red-400">Down </span>2 days ago
                         </p>
@@ -88,7 +101,6 @@ export default async function MonitorPage({
                         </div>
                       </div>
                     </DisplayRightElement>
-                    
                   </DisplayRowRightSection>
                 </DisplayRow>
               ))
