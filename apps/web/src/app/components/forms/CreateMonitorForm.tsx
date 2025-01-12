@@ -29,6 +29,10 @@ export default function CreateMonitorForm() {
   const { teamId } = useParams();
   const router = useRouter();
   console.log("teamId:", teamId);
+  const regions = [
+    { id: "ap-south-1", label: "India" },
+    { id: "ap-usa-1", label: "USA" },
+  ] as const;
   const {
     control,
     register,
@@ -57,32 +61,32 @@ export default function CreateMonitorForm() {
     console.log("data", data);
     alert(JSON.stringify(data));
 
-    try {
-      const response = await fetch(`/api/team/${teamId}/monitors/create`, {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+    // try {
+    //   const response = await fetch(`/api/team/${teamId}/monitors/create`, {
+    //     method: "POST",
+    //     body: JSON.stringify(data),
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //   });
 
-      if (!response.ok) {
-        // other than 2xx and 3xx
-        const { error } = await response.json();
-        throw new Error(error).message;
-      }
+    //   if (!response.ok) {
+    //     // other than 2xx and 3xx
+    //     const { error } = await response.json();
+    //     throw new Error(error).message;
+    //   }
 
-      const result = await response.json();
-      console.log("result:", result);
+    //   const result = await response.json();
+    //   console.log("result:", result);
 
-      toast.success(result?.message);
+    //   toast.success(result?.message);
 
-      router.push(`/dashboard/team/${teamId}/monitors`);
-    } catch (error) {
-      const err = (error as Error).message;
-      console.log("error", err);
-      toast.error(err);
-    }
+    //   router.push(`/dashboard/team/${teamId}/monitors`);
+    // } catch (error) {
+    //   const err = (error as Error).message;
+    //   console.log("error", err);
+    //   toast.error(err);
+    // }
   };
   return (
     <>
@@ -466,22 +470,54 @@ export default function CreateMonitorForm() {
             </OptionLeftSection>
             <OptionRightSection>
               <div className="flex flex-col md:flex-row items-start gap-6">
-                <div className="flex items-center gap-1.5">
-                  <Checkbox
-                    id="india"
-                    className="border-neutral-5"
-                    value={"ap-south-1"}
-                    checked
+                {regions.map((region) => (
+                  <Controller
+                    name="regions"
+                    control={control}
+                    render={({ field }) => {
+                      console.log("field", field.value);
+                      return (
+                        <>
+                          <div
+                            key={region.id}
+                            className="flex items-center gap-1.5"
+                          >
+                            <Checkbox
+                              {...register("regions")}
+                              id={region.id}
+                              className="border-neutral-5"
+                              value={region.id}
+                              checked={
+                                region.id === "ap-south-1" ||
+                                field.value.includes(region.id) // Ensure "India" is always checked
+                              }
+                              onCheckedChange={(checked) => {
+                                // Allow toggling for other regions
+                                if (region.id !== "ap-south-1") {
+                                  const updatedRegions = checked
+                                    ? [...field.value, region.id]
+                                    : field.value.filter(
+                                        (val) => val !== region.id
+                                      );
+                                  field.onChange(updatedRegions);
+                                }
+                              }}
+                            />
+                            <Label htmlFor={region.id} className="text-sm">
+                              {region.label}
+                            </Label>
+                          </div>
+                        </>
+                      );
+                    }}
                   />
-                  <Label title="india" htmlFor="india" className="text-sm">
-                    India
-                  </Label>
-                  {errors.regions && (
-                    <div className="text-destructive">
-                      {errors.regions.message}
-                    </div>
-                  )}
-                </div>
+                ))}
+                {/* Validation Error */}
+                {errors.regions && (
+                  <div className="text-destructive">
+                    {errors.regions.message}
+                  </div>
+                )}
               </div>
             </OptionRightSection>
           </OptionRow>
