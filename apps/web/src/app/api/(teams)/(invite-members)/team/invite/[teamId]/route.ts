@@ -3,9 +3,9 @@ import { z } from "zod";
 import { prisma } from "@repo/db/";
 import { auth } from "@/utils/auth";
 import { generateAuthToken } from "@/lib/token";
-import { sendEmail } from "@/lib/email";
+import { sendEmail } from "@repo/emails";
 import { render } from "@react-email/render";
-import InvitationEmail from "@/emails/InvitationEmail";
+import {InvitationEmail} from "@repo/emails";
 import { zodParser } from "@/utils/zodParser";
 
 const emailSchema = z.object({
