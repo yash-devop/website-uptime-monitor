@@ -58,35 +58,32 @@ export default function CreateMonitorForm() {
   }, [errors]);
 
   const onSubmit: SubmitHandler<CreateMonitorFormFields> = async (data) => {
-    console.log("data", data);
-    alert(JSON.stringify(data));
+    try {
+      const response = await fetch(`/api/team/${teamId}/monitors/create`, {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-    // try {
-    //   const response = await fetch(`/api/team/${teamId}/monitors/create`, {
-    //     method: "POST",
-    //     body: JSON.stringify(data),
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //   });
+      if (!response.ok) {
+        // other than 2xx and 3xx
+        const { error } = await response.json();
+        throw new Error(error).message;
+      }
 
-    //   if (!response.ok) {
-    //     // other than 2xx and 3xx
-    //     const { error } = await response.json();
-    //     throw new Error(error).message;
-    //   }
+      const result = await response.json();
+      console.log("result:", result);
 
-    //   const result = await response.json();
-    //   console.log("result:", result);
+      toast.success(result?.message);
 
-    //   toast.success(result?.message);
-
-    //   router.push(`/dashboard/team/${teamId}/monitors`);
-    // } catch (error) {
-    //   const err = (error as Error).message;
-    //   console.log("error", err);
-    //   toast.error(err);
-    // }
+      router.push(`/dashboard/team/${teamId}/monitors`);
+    } catch (error) {
+      const err = (error as Error).message;
+      console.log("error", err);
+      toast.error(err);
+    }
   };
   return (
     <>
