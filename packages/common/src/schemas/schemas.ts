@@ -52,6 +52,7 @@ export const monitorSchema = z.object({
     }).array()
 })
 
+export const editMonitorSchema = monitorSchema.partial();
 // Invitation Schema
 // Members Schema
 // Monitor Schema
