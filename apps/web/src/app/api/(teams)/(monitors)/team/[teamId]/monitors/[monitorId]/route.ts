@@ -1,5 +1,6 @@
 import { auth } from "@/utils/auth";
-import {prisma} from "@repo/db";
+import { prisma } from "@repo/db";
+import { format } from "date-fns";
 import { NextRequest, NextResponse } from "next/server";
 
 export const GET = async (
@@ -22,13 +23,15 @@ export const GET = async (
   }
 
   const monitor = await prisma.monitor.findUnique({
-     where: {
-        id: monitorId
-     }
+    where: {
+      id: monitorId,
+    },
   });
-
-  return NextResponse.json({
-    data: monitor
-  })
+  if (!monitor) {
+    return NextResponse.json({ message: "Monitor not found" }, { status: 404 });
+  }
+  return NextResponse.json(
+    { message: "Monitor found", data: monitor },
+    { status: 200 }
+  );
 };
-
