@@ -8,10 +8,12 @@ import DisplayRow, {
 import { Button } from "@/app/components/ui/button";
 import { auth } from "@/utils/auth";
 import { prisma } from "@repo/db";
+import { format, millisecondsToSeconds } from "date-fns";
 import { CircleDashed, CircleDot, Ellipsis } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 
+export const revalidate = 10
 export default async function MonitorPage({
   params,
 }: {
@@ -41,11 +43,22 @@ export default async function MonitorPage({
       createdAt: "desc",
     },
   });
+  
+  function formatMilliseconds(ms:number) {
+    const seconds = millisecondsToSeconds(ms);
+    if (seconds < 60) {
+      return `${seconds} seconds`;
+    } else {
+      const minutes = Math.floor(seconds / 60);
+      const remainingSeconds = seconds % 60;
+      return `${minutes} minutes ${remainingSeconds ? `${remainingSeconds} seconds` : ''}`;
+    }
+  }
   return (
     <>
       <div className="w-full">
         <div className="flex flex-col md:flex-row items-start md:items-center w-full justify-between gap-4">
-          <p className="text-2xl capitalize"> Hello , {session?.user?.name} </p>
+          <p className="text-2xl capitalize"> Hello , {session?.user?.name ?? "User"} </p>
           <Button size={"sm"} className="">
             <Link href={`${pathname}/create`}>Create monitor</Link>
           </Button>
@@ -55,7 +68,7 @@ export default async function MonitorPage({
           {/* Wrap the rows in a container */}
           <div className="flex flex-col min-w-max">
             {monitors.length > 0 ? (
-              monitors.map(({ urlAlias, id, CheckLog }, idx) => (
+              monitors.map(({ urlAlias, id, CheckLog , status , checkFrequency }, idx) => (
                 // TODO: add isUp or monitorUp or down so to give color to the DisplayRow's Dot / fancy icon
                 <DisplayRow
                   idx={idx}
@@ -81,7 +94,15 @@ export default async function MonitorPage({
                       <div className="flex flex-col">
                         <h2 className="text-sm">{urlAlias}</h2>
                         <p className="text-neutral-3 text-xs">
-                          <span className="text-red-400">Down </span>2 days ago
+                          <span className={`${CheckLog.length > 0
+                            ? CheckLog[0].webStatus === "down"
+                              ? " text-red-400"
+                              : ""
+                            : " text-neutral-3"}`}>{CheckLog.length > 0
+                            ? CheckLog[0].webStatus === "down"
+                              ? "Down"
+                              : "Up"
+                            : "Calculating"}</span> - 2 days ago
                         </p>
                       </div>
                     </DisplayLeftElement>
@@ -91,7 +112,7 @@ export default async function MonitorPage({
                     <DisplayRightElement>
                       <div className="text-sm text-neutral-3 flex items-center gap-2 w-fit">
                         <CircleDot size={16} className="text-neutral-4" />
-                        <p>Checking every {"3m"}</p>
+                        <p>Checking every {formatMilliseconds(Number(checkFrequency))}</p>
                       </div>
                     </DisplayRightElement>
                     <DisplayRightElement>
