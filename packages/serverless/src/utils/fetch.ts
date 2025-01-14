@@ -24,6 +24,7 @@ type FetcherReturnType = {
   error?: {
     name: string;
     cause: string;
+    type: "timeout" | "aborted" | "httpError" | "dnsFailure";
   };
 };
 
@@ -47,13 +48,14 @@ export async function fetcher({
   }
 
   try {
+    type UppercaseMethods = Uppercase<typeof httpMethods>;
+    const method = (httpMethods && httpMethods.toUpperCase() as UppercaseMethods) ?? "GET";
     const response = await fetch(url, {
-      method: httpMethods ?? "GET",
-      body: httpRequestBody,
+      method: method,
+      body: method !== "GET" ? httpRequestBody : null,
       headers: customHeaders ? { ...customHeaders } : {},
       signal: timeoutSignal,
     });
-
     if (!response.ok) {
       const error = new Error(response.statusText);
       error.name = `Status ${response.status}`;
@@ -75,6 +77,7 @@ export async function fetcher({
         error: {
           name: "HTTP Timeout",
           cause: error.message,
+          type: "timeout",
         },
       };
     } else if (error.name === "AbortError") {
@@ -86,6 +89,7 @@ export async function fetcher({
         error: {
           name: "HTTP Aborted",
           cause: error.message,
+          type: "aborted",
         },
       };
     } else if (error.name === "TypeError") {
@@ -95,6 +99,7 @@ export async function fetcher({
         error: {
           name: "DNS Failure",
           cause: error.message,
+          type: "dnsFailure",
         },
       };
     } else {
@@ -105,6 +110,7 @@ export async function fetcher({
         error: {
           name: error.name,
           cause: error.message,
+          type: "httpError",
         },
       };
     }
