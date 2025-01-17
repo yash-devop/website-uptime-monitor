@@ -106,7 +106,7 @@ export default async function MonitorIDPage({
                   {incident.incidentStatus}
                   <span className="text-neutral-4">
                     {" "}
-                    · {format(incident.createdAt, "dd MMM yyyy 'at' hh:ss a")}
+                    · {format(incident.createdAt, "dd MMM yyyy 'at' hh:mm a")}
                   </span>
                 </p>
               </div>
