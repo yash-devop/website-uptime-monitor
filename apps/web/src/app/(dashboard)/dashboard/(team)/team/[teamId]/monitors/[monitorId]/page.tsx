@@ -1,5 +1,4 @@
 import { IconGenerator } from "@/app/components/DisplayRow";
-import { LucideProps, Settings, ShieldAlert, Trash2 } from "lucide-react";
 import { prisma } from "@repo/db";
 import {
   formatDistanceToNow,
@@ -10,6 +9,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { MonitorCTA } from "./QuickCTA";
+import ClientSideMetrics from "./ClientSideMetrics";
 
 export default async function MonitorIDPage({
   params,
@@ -19,7 +19,7 @@ export default async function MonitorIDPage({
     teamId: string;
   }>;
 }) {
-  const { monitorId , teamId } = await params;
+  const { monitorId } = await params;
   const monitor = await prisma.monitor.findFirst({
     where: {
       id: monitorId,
@@ -32,9 +32,9 @@ export default async function MonitorIDPage({
       },
       Incident: {
         where: {
-          monitorId
-        }
-      }
+          monitorId,
+        },
+      },
     },
   });
   console.log("monitor", monitor);
@@ -50,54 +50,66 @@ export default async function MonitorIDPage({
       createdAt: true,
     },
   });
-  if (!lastChecked) {
-    console.log("No checks found for this monitor.");
-    return;
-  }
-  const duration = intervalToDuration({
-    start: 0,
-    end: Number(monitor?.checkFrequency),
-  });
-  const lastCheckedDate = new Date(lastChecked.createdAt);
-  const timeAgo = formatDistanceToNow(lastCheckedDate, { addSuffix: true });
+  const timeAgo = lastChecked ? formatDistanceToNow(new Date(lastChecked.createdAt), { addSuffix: true }) : "No checks performed yet.";
+  const checkFrequency = Number(monitor?.checkFrequency || 0);
+  const duration = checkFrequency > 0 ? intervalToDuration({ start: 0, end: checkFrequency }): null;
 
   console.log(`Last checked: ${timeAgo}`);
   return (
     <>
-      <p className="pb-4">Monitor id is {monitorId}</p>
-      <div className="flex flex-col gap-4 max-w-[1400px] mx-auto w-full">
-        <div className="flex flex-wrap items-center justify-between gap-3 px-2">
-          <div className="flex items-center gap-6">
-            <IconGenerator
-              iconType="dot"
-              heartBeatType="infinite"
-              className={`${monitor?.status === "down" ? "bg-red-400" : "bg-green-400"}`}
-            />
-            <div>
-              <h1 className="text-xl font-semibold">{monitor?.urlAlias}</h1>
-              <p
-                className={`${monitor?.status === "down" ? "text-red-400" : "text-green-400"} text-sm`}
-              >
-                {monitor?.status ?? "unavailable"}
-                <span className="text-neutral-4">
-                  {" "}
-                  · {`Checked every ${formatDuration(duration)}`}
-                </span>
-              </p>
+      {monitor ? (
+        <div className="flex flex-col gap-4 max-w-[1400px] mx-auto w-full">
+          <div className="flex flex-wrap items-center justify-between gap-3 px-2">
+            <div className="flex items-center gap-6">
+              <IconGenerator
+                iconType="dot"
+                heartBeatType="infinite"
+                className={`${monitor?.status === "down" ? "bg-red-400" : monitor.status ==="up" ? "bg-green-400": "bg-neutral-5"}`}
+              />
+              <div>
+                <h1 className="text-xl font-semibold">{monitor.urlAlias}</h1>
+                <p
+                  className={`${monitor?.status === "down" ? "text-red-400" : monitor.status ==="up" ? "text-green-400": "text-neutral-4"} text-sm`}
+                >
+                  {monitor?.status ?? "Calculating"}
+                  <span className="text-neutral-4">
+                    {" "}
+                    ·{" "}
+                    {duration ? `Checked every ${formatDuration(duration)}` : "Check frequency not set"}
+                  </span>
+                </p>
+              </div>
             </div>
           </div>
+          <MonitorCTA />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <StatusCard name="Currently up for" status={"---"} />
+            <StatusCard
+              name="Last checked"
+              status={timeAgo ?? "No checks have been performed yet."}
+            />
+            <StatusCard
+              name="Incidents"
+              status={monitor?._count.Incident.toString() ?? "0"}
+            />
+          </div>
+          <ClientSideMetrics />
         </div>
-        <MonitorCTA />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <StatusCard name="Currently up for" status={"---"} />
-          <StatusCard name="Last checked" status={timeAgo ?? "---"} />
-          <StatusCard
-            name="Incidents"
-            status={monitor?._count.Incident.toString() ?? "0"}
-          />
-        </div>
-        {/* <ClientSideMetrics /> */}
-      </div>
+      ) : (
+        <>
+          <div className="flex flex-col items-center justify-center h-full">
+            <h1 className="text-2xl font-semibold text-red-500">
+              Monitor Not Found
+            </h1>
+            <p className="text-gray-500">
+              The requested monitor does not exist or could not be retrieved.
+            </p>
+            <Link href="/monitors" className="mt-4 text-blue-500 underline">
+              Go back to Monitors
+            </Link>
+          </div>
+        </>
+      )}
     </>
   );
 }
