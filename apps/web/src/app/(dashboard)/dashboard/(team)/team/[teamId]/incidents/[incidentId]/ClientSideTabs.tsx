@@ -7,7 +7,17 @@ import {
 } from "@/app/components/ui/tabs";
 import ClientSideClipboard from "./ClientSideClipboard";
 import { useRef } from "react";
-export default function ClientSideTabs() {
+
+
+export default function ClientSideTabs({
+status,
+url,
+curlCommand
+}: {
+  status: string,
+  url: string,
+  curlCommand?: string
+}) {
   const clipboardRef = useRef<HTMLElement>(null);
   return (
     <>
@@ -26,14 +36,18 @@ export default function ClientSideTabs() {
           </TabsList>
           <div className="rounded-md bg-neutral-7 text-sm text-neutral-2 py-6 flex items-center justify-start px-4 relative">
             <TabsContent value="response">
-              495 SSL Certificate Error
+              {status}
             </TabsContent>
             <TabsContent value="replay" className="flex ">
               <code ref={clipboardRef} className="overflow-x-auto">
-                curl -L --connect-timeout 28 --max-time 30 \ -H 'User-Agent:
-                Control Control Uptime Bot Mozilla/5.0 (Windows NT 10.0; Win64;
-                x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0
-                Safari/537.36' \ {`https://httpstat.us/495`}
+                {
+                  !curlCommand ? (
+                    `curl -L --connect-timeout 28 --max-time 30 \ -H 'User-Agent:
+                    Control Control Uptime Bot Mozilla/5.0 (Windows NT 10.0; Win64;
+                    x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0
+                    Safari/537.36' \ ${url}`
+                  ) : curlCommand
+                }
               </code>
               <ClientSideClipboard clipboardRef={clipboardRef} />
             </TabsContent>
