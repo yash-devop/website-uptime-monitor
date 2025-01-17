@@ -1,5 +1,5 @@
 {
-  "name": "website-uptime-monitor",
+  "name": "@repo/website-uptime-monitor",
   "version": "0.1.0",
   "private": true,
   "scripts": {
