@@ -1,7 +1,5 @@
 import { NextFetchEvent, NextRequest, NextResponse } from "next/server";
 import { CustomMiddleware } from "./chain";
-import { auth } from "@/utils/auth";
-import {prisma} from "@repo/db";
 import { redis } from "@/lib/redis/redis";
 import { cookies } from "next/headers";
 
