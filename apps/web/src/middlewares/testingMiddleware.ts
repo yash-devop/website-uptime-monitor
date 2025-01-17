@@ -1,6 +1,5 @@
 import {
   NextFetchEvent,
-  NextMiddleware,
   NextRequest,
   NextResponse,
 } from "next/server";
