@@ -7,7 +7,7 @@ export default async function Navbar(){
     const session = await auth();
     return (
         <>
-            <header className="h-14 bg-sred-400 flex items-center justify-between w-full border border-b border-neutral-6 bg-black-1/65 backdrop-blur-sm text-sm px-8">
+            <header className="h-14 bg-sred-400 flex items-center justify-between w-full border-b border-neutral-6 bg-black-1/65 backdrop-blur-sm text-sm px-8">
                 <nav className="max-w-[1200px] mx-auto flex items-center justify-between w-full text-white">
                     <div>
                         <Control 
