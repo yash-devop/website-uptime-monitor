@@ -3,10 +3,10 @@ import { Control } from "@/app/components/icons/Control";
 import { Button } from "@/app/components/ui/button";
 import { Separator } from "@/app/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { fetcher, FetchError } from "@/utils/fetcher";
+import { FetchError } from "@/utils/fetcher";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 type Codes =
