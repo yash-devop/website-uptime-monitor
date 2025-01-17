@@ -1,4 +1,3 @@
-import Stripe from "stripe";
 import { StripeInstance } from "./index";
 
 export const createStripeCustomer = async ({
