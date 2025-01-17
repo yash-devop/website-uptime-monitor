@@ -31,7 +31,7 @@ export default function EditMonitorForm() {
     control,
     register,
     handleSubmit,
-    formState: { isSubmitting, errors, defaultValues, touchedFields, isDirty },
+    formState: { isSubmitting, errors, defaultValues, isDirty },
   } = useForm<EditMonitorFormFields>({
     resolver: zodResolver(editMonitorSchema),
     defaultValues: async (): Promise<EditMonitorFormFields> => {
