@@ -1,6 +1,5 @@
 import { auth } from "@/utils/auth";
 import { prisma } from "@repo/db";
-import { format } from "date-fns";
 import { NextRequest, NextResponse } from "next/server";
 
 export const GET = async (

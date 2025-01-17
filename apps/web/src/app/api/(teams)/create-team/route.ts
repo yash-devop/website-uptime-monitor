@@ -1,12 +1,11 @@
 import { createStripeCustomer } from "@/lib/stripe/customer";
 import { auth } from "@/utils/auth";
-import { getUniqueTeamName } from "@/utils/getUniqueTeamName";
 import {prisma} from "@repo/db";
 import { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { z, ZodError } from "zod";
 
-type Plan = "FREE" | "PRO";
+// type Plan = "FREE" | "PRO";
 
 type Team = {
   teamName: string;
@@ -24,7 +23,7 @@ const teamSchema = z.object({
   })
 });
 
-export const POST = async (req: NextRequest,res:NextResponse) => {
+export const POST = async (req: NextRequest) => {
   const session = await auth();
   console.log('Session:', session);
   if (!session || !session.user) {
@@ -38,7 +37,7 @@ export const POST = async (req: NextRequest,res:NextResponse) => {
 
   // const teamName = getUniqueTeamName();
   try {
-    const data = teamSchema.parse({
+    teamSchema.parse({
        email,
        teamName
     })

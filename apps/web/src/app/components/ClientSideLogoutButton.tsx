@@ -1,14 +1,12 @@
 "use client";
 
 import { signOut } from "next-auth/react";
-import { Button, buttonVariants } from "./ui/button";
+import { buttonVariants } from "./ui/button";
 import { LogOut } from "lucide-react";
 import { VariantProps } from "class-variance-authority";
-import { cn } from "@/lib/utils";
 
 export default function ClientSideLogoutButton({
   icon = <LogOut size={17}/>,
-  variant
 }:{
   icon?: React.ReactElement
   variant?: VariantProps<typeof buttonVariants>["variant"];

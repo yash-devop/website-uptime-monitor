@@ -2,7 +2,7 @@ import { auth } from "@/utils/auth";
 import {prisma} from "@repo/db";
 import { NextRequest, NextResponse } from "next/server";
 
-export const POST = async (req: NextRequest,res:NextResponse) => {
+export const POST = async () => {
   const session = await auth();
   if (!session || !session.user) {
     return NextResponse.json(

@@ -1,6 +1,5 @@
 import { auth } from "@/utils/auth";
 import { NextRequest, NextResponse } from "next/server";
-import { CheckFrequencyType, type MonitorType } from "@repo/common";
 import { monitorSchema } from "@repo/common";
 import { zodParser } from "@/utils/zodParser";
 import { prisma } from "@repo/db";
@@ -67,24 +66,29 @@ export const POST = async (req: NextRequest, res: NextResponse) => {
     console.log('Monitor created: ', monitor);
 
     if (monitor) {
-      const jobId = `HealthCheckJob-${monitor.id}`;
+      // const jobId = `HealthCheckJob-${monitor.id}`;
+      const repeatableJobId = `HealthCheckJob-repeat-${monitor.id}`;
       try {
-        const immediateJob = await HealthCheckQueue.add(jobId, monitor, {     // created to executed that monitor ASAP.
-          delay: 0,
-          jobId,     
-        });
-        const repeatableJob = await HealthCheckQueue.add(jobId, monitor, {  // then add repeatable checkFrequencies.
-          repeat: {
-            every: Number(checkFrequency),
-          },
-          jobId,    // if something went wrong related to the ids , then note that here we overide the default id... revert back if need ( it will then give ids like => repeat:id)
-        });
+        // const immediateJob = await HealthCheckQueue.add(jobId, monitor, {     // created to executed that monitor ASAP.
+        //   delay: 0,
+        //   jobId,
+        //   removeOnComplete: true   
+        // });
+        const repeatableJob = await HealthCheckQueue.upsertJobScheduler(repeatableJobId,{
+          every: Number(checkFrequency),
+          
+        },{name: repeatableJobId,data:monitor})
   
-        // HealthCheckQueue.getJobs([""])
-        console.log('immediateJob',immediateJob);
-        console.log(
-          `✅Monitor ${monitor.urlAlias} is added to the queue with immediateJob id of ${immediateJob.id} and Repeatablejob id: ${repeatableJob.id}`
-        );
+        // console.log('immediate job', {
+        //   id: immediateJob.id,
+        //   data: immediateJob.data,
+        //   opts: immediateJob.opts
+        // });
+        // console.log('repeatableJob', {
+        //   id: repeatableJob.id,
+        //   data: repeatableJob.data,
+        //   opts: repeatableJob.opts
+        // });
         
       } catch (error) {
         console.log('error while creating Monitor Job', error);

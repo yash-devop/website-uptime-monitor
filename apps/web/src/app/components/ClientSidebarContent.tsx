@@ -13,11 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import {
-  Calendar,
   Activity,
-  Inbox,
-  LogOut,
-  Search,
   Settings,
   Siren,
   Layers3,

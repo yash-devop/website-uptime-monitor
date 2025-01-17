@@ -9,7 +9,6 @@ import {
 import TeamsModal from "@/app/components/modal/TeamsModal";
 import { cookies } from "next/headers";
 import { prisma } from "@repo/db";
-import { auth } from "@/utils/auth";
 import Image from "next/image";
 
 type Members = {
@@ -36,7 +35,7 @@ type TeamInvitationMemberProps = {
   inviteTo: string;
 };
 // import { User } from "lucide-react";
-function TeamMember({ teamName, member, index, plan }: TeamMemberProps) {
+function TeamMember({ member }: TeamMemberProps) {
   return (
     <>
       <TableRow className="hover:bg-background">
@@ -123,7 +122,6 @@ export default async function TeamsPage({
   // const {} = await params; 
   const teamId = cookies().get("team-slug")?.value ?? (await params).teamId;
   console.log("teamId: ", teamId);
-  const session = await auth();
 
   // Step 1: Fetch owner user IDs for the team
   const ownerUserIds = await prisma.teamMembership.findMany({

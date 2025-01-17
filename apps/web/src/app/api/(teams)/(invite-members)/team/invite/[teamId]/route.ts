@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { prisma } from "@repo/db/";
+import { prisma } from "@repo/db";
 import { auth } from "@/utils/auth";
 import { generateAuthToken } from "@/lib/token";
 import { sendEmail } from "@repo/emails";
