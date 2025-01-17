@@ -1,9 +1,5 @@
 import ClientAuthButton from "@/app/components/ClientGoogleButton";
 import { Control } from "@/app/components/icons/Control";
-import { GithubIcon } from "@/app/components/icons/Github";
-import { GoogleIcon } from "@/app/components/icons/Google";
-import { Button } from "@/app/components/ui/button";
-import { signIn } from "next-auth/react";
 import { cookies } from "next/headers";
 
 export default function Signin() {
