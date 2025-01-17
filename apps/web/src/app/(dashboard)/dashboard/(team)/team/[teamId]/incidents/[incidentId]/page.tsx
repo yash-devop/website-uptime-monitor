@@ -1,7 +1,6 @@
 import { IconGenerator } from "@/app/components/DisplayRow";
 import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
-import { Globe, Trash2 } from "lucide-react";
 import ClientSideTabs from "./ClientSideTabs";
 import { Metadata, ResolvingMetadata } from "next";
 import { INCIDENT_STATUS, prisma } from "@repo/db";
@@ -25,10 +24,8 @@ export async function generateMetadata(
     params: Promise<{
       incidentId: string
     }>,
-  },
-  parent: ResolvingMetadata,
+  }
 ): Promise<Metadata> {
-  console.log('params in METATAG',await params);
   const {incidentId} = await params
   const incident = await prisma.incident.findFirst({
     where: {

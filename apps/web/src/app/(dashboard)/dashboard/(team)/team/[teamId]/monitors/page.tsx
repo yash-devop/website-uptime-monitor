@@ -8,8 +8,8 @@ import DisplayRow, {
 import { Button } from "@/app/components/ui/button";
 import { auth } from "@/utils/auth";
 import { prisma } from "@repo/db";
-import { format, millisecondsToSeconds } from "date-fns";
-import { CircleDashed, CircleDot, Ellipsis } from "lucide-react";
+import { millisecondsToSeconds } from "date-fns";
+import { CircleDot, Ellipsis } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 
@@ -68,7 +68,7 @@ export default async function MonitorPage({
           {/* Wrap the rows in a container */}
           <div className="flex flex-col min-w-max">
             {monitors.length > 0 ? (
-              monitors.map(({ urlAlias, id, CheckLog , status , checkFrequency }, idx) => (
+              monitors.map(({ urlAlias, id, CheckLog , checkFrequency }, idx) => (
                 // TODO: add isUp or monitorUp or down so to give color to the DisplayRow's Dot / fancy icon
                 <DisplayRow
                   idx={idx}

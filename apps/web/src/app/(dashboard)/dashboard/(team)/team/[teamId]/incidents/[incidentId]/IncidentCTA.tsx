@@ -1,13 +1,12 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { LucideProps, Settings, ShieldAlert, Trash2 } from "lucide-react";
+import { LucideProps, ShieldAlert, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 
 export const IncidentCTA = () => {
   const pathname = usePathname();
-  const {teamId} = useParams()
   return (
     <>
       <div className="flex flex-wrap items-center gap-3 pt-6">
