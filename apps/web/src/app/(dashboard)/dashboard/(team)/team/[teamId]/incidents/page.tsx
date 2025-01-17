@@ -9,7 +9,7 @@ import DisplayRow, {
 import { prisma } from "@repo/db";
 import { Ellipsis } from "lucide-react";
 import { headers } from "next/headers";
-import {format, formatDistance} from "date-fns"
+import {formatDistance} from "date-fns"
 
 export default async function IncidentPage({
   params,
@@ -40,7 +40,7 @@ export default async function IncidentPage({
         {/* Wrap the rows in a container */}
         <div className="flex flex-col min-w-max">
           {incidents.length > 0 ? (
-            incidents.map(({ id, monitorId, incidentName, incidentStatus, incidentCause , createdAt },idx) => (
+            incidents.map(({ id, incidentName, incidentStatus, incidentCause , createdAt },idx) => (
                 <>
                   <DisplayRow
                     idx={idx}
