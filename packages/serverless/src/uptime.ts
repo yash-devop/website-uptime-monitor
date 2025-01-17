@@ -1,4 +1,4 @@
-import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
+import { APIGatewayProxyResult } from "aws-lambda";
 import { MonitorType } from "@repo/common";
 import { fetcher } from "./utils/fetch";
 import { isWebsiteUp } from "./utils/isWebsiteUp";
@@ -58,7 +58,10 @@ module.exports.handler  = async (
   const isUp = isWebsiteUp(statusCode!);
   const down_at = !isUp ? current_date_time : null;
   const webStatus = isUp ? "up" : "down"
-
+  const end = performance.now();
+  const responseTime = Number((end - start).toFixed(0));
+  const headers = response?.headers;
+  
   if(!success){   // Error Occured.
     return {
       statusCode: 200, // status code of the lambda function and not the Tested URL. 
@@ -70,6 +73,8 @@ module.exports.handler  = async (
         message: "Lambda Response ❌",
         region: currentRegion,
         data: {
+          response,
+          responseTime,
           url,
           statusCode: statusCode,
           isUp: false,
@@ -77,15 +82,13 @@ module.exports.handler  = async (
           down_at,
           error: {
             name: error?.name,
-            cause: error?.cause
+            cause: error?.cause,
+            type: error?.type
           }
         },
       }),
     };
   }
-  const end = performance.now();
-  const responseTime = Number((end - start).toFixed(0));
-  const headers = response?.headers;
 
   return {
     statusCode: 200, // status code of the lambda function
