@@ -3,12 +3,14 @@ import Navbar from "./components/Navbar";
 import { Button } from "./components/ui/button";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import ChangelogBanner from "./components/ChangelogBanner";
 export default async function Home() {
   const session = await auth();
 
   return (
     <>
       <div className="h-full min-h-screen w-full">
+        <ChangelogBanner changelog="Some features are on the way, still you can use the basic monitoring service."/>
         <Navbar />
         <div className="bg-green-2 h-[300px] md:h-[330px] md:w-[400px] absolute top-0 left-0 right-0 m-auto z-[-1] rounded-bl-full rounded-br-full blur-[180px]" />
         <div className="max-w-[1200px] mx-auto px-3">
