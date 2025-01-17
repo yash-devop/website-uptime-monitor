@@ -5,7 +5,7 @@ import { config } from "dotenv";
 import { prisma } from "@repo/db";
 import { createClient } from "redis";
 import { getPrettyDate, notifyIncidentToTeam } from "./utils";
-import { format } from "date-fns";
+
 config({ path: "../.env" });
 
 console.log("Worker is running...");
@@ -54,9 +54,9 @@ const worker = new Worker(
   "HealthCheckQueue",
   async (job: Job) => {
     const monitorData: MonitorType & { id: string } = job.data;
-    console.log("monitorData", monitorData);
     const REGIONS = ["ap-south-1"];
-
+    
+    console.log(`Monitor log => ${monitorData.url} is processed by worker after ${job.id}.`);
     const AWS_RESPONSE = await Promise.all(
       REGIONS.map((region) =>
         invokeLambda(region, {
@@ -238,6 +238,14 @@ const worker = new Worker(
             error!.cause ?? incidentCause
           );
         } else {
+          await prisma.monitor.update({
+            data: {
+              status: "up",
+            },
+            where: {
+              id: monitorData.id,
+            },
+          });
           console.log("✅ Website is up and no incidents to update");
         }
         return;
@@ -306,6 +314,29 @@ const worker = new Worker(
   }
 );
 
-worker.on("completed", () => {
-  console.log("I'm free now.");
+worker.on("completed", (job) => {
+  console.log('\n');
+  console.log("------------ Worker is now free ---------------");
 });
+
+
+worker.on("active", (job)=>{
+  console.log('Job',job.data);
+  console.log(`Active Monitor => ${job.data.url} is processed by worker after ${job.id}.`);
+
+})
+
+
+
+worker.on('drained', () => {
+  // Queue is drained, no more jobs left
+  console.log('No more jobs left');
+});
+worker.on('closing', (s) => {
+  // working is closingggg....
+  console.log('Worker is now closing....',s);
+});
+
+process.on("SIGINT",async()=>{
+  await worker.close()
+})
