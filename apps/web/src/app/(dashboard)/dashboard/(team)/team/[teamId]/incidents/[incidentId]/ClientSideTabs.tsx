@@ -42,10 +42,10 @@ curlCommand
               <code ref={clipboardRef} className="overflow-x-auto">
                 {
                   !curlCommand ? (
-                    `curl -L --connect-timeout 28 --max-time 30 \ -H 'User-Agent:
+                    `curl -L --connect-timeout 28 --max-time 30 \\ -H 'User-Agent:
                     Control Control Uptime Bot Mozilla/5.0 (Windows NT 10.0; Win64;
                     x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0
-                    Safari/537.36' \ ${url}`
+                    Safari/537.36' \\ ${url}`
                   ) : curlCommand
                 }
               </code>
