@@ -42,22 +42,19 @@ export default function ClientSidebarContent() {
       title: "Status Pages",
       url: generateUrlWithTeamId("/status", teamId),
       icon: Layers3,
+      coming_soon: true
     },
     {
       title: "Notifications",
       url: generateUrlWithTeamId("/notifications", teamId),
       icon: Vibrate,
+      coming_soon: true
     },
     {
       title: "Teams",
       url: generateUrlWithTeamId("/teams", teamId),
       icon: Users,
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings,
-    },
+    }
   ];
 
   return (
@@ -88,12 +85,21 @@ export default function ClientSidebarContent() {
                       <Link
                         href={item.url}
                         className={cn(
-                          `text-sm`,
-                          isActive && "text-green-2 [&>svg]:text-green-1"
+                          `text-sm flex items-center justify-between`,
+                          isActive && " [&>svg]:text-green-1"
                         )}
                       >
-                        <item.icon size={17} />
-                        <span className={"text-sm"}>{item.title}</span>
+                        <div className={`flex items-center gap-2 ${isActive && "[&>svg]:text-green-1"}`}>
+                          <item.icon size={17} />
+                          <span className={"text-sm"}>{item.title}</span>
+                        </div>
+                        {
+                          item.coming_soon ? (
+                            <div className="bg-neutral-7 text-xs border border-neutral-6 text-neutral-4 p-1 rounded-md">
+                              <span>coming soon</span>
+                            </div>
+                          ) : null
+                        }
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
