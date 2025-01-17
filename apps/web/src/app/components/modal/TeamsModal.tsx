@@ -47,9 +47,7 @@ export default function TeamsModal() {
     }
   };
 
-  const handleSubmit = async (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
+  const handleSubmit = async () => {
     // invitees
     toast.loading("Sending invitation...");
     const data = await fetcher(`/api/team/invite/${teamId}`, {
@@ -125,7 +123,7 @@ export default function TeamsModal() {
             <Button
               type="button"
               disabled={!invitees.length ? true : false}
-              onClick={(e) => handleSubmit(e)}
+              onClick={() => handleSubmit()}
               className=""
             >
               <span>Invite</span>
