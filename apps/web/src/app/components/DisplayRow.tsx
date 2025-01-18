@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { ShieldAlert } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
@@ -11,7 +11,7 @@ type IconGeneratorType =
       className?: string;
       heartBeatType: HeartBeatType;
     }
-  | { iconType: "fancy"; color?: string ; iconSize?:string }
+  | { iconType: "fancy"; Icon?: React.ReactNode, color?: string ; iconSize?:string }
   | { iconType: "disabled"; color?: string }
   | { iconType: "custom"; custom: React.ElementType };
 
@@ -130,7 +130,9 @@ export const IconGenerator = (props: IconGeneratorType) => {
               props.color
             )}
           >
-            <ShieldAlert size={20} className={cn(`shrink-0`,props.iconSize)} />
+            {
+              !props.Icon ? <Trash2 size={20} className={cn(`shrink-0`,props.iconSize)} /> : props.Icon
+            }
           </div>
         </>
       ) : iconType === "custom" ? (
