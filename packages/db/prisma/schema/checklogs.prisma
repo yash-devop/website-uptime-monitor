@@ -14,7 +14,7 @@ model CheckLog {
   // have checklog for each monitor
 
   monitorId String
-  Monitor   Monitor @relation(fields: [monitorId], references: [id])
+  Monitor   Monitor @relation(fields: [monitorId], references: [id] , onDelete: Cascade)
 }
 
 enum WEB_STATUS {

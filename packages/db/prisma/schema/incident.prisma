@@ -17,7 +17,7 @@ model Incident {
 
     monitorId      String          
     teamId         String          
-    monitor        Monitor         @relation(fields: [monitorId], references: [id])
+    monitor        Monitor         @relation(fields: [monitorId], references: [id], onDelete: Cascade)
     // teamMembership TeamMembership  @relation(fields: [teamId] , references: [id])
     team          Team  @relation(fields: [teamId] , references: [id])
 }
