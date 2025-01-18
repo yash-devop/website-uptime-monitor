@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Trash2 } from "lucide-react";
+import { ShieldAlert } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
@@ -131,7 +131,7 @@ export const IconGenerator = (props: IconGeneratorType) => {
             )}
           >
             {
-              !props.Icon ? <Trash2 size={20} className={cn(`shrink-0`,props.iconSize)} /> : props.Icon
+              !props.Icon ? <ShieldAlert size={20} className={cn(`shrink-0`,props.iconSize)} /> : props.Icon
             }
           </div>
         </>
