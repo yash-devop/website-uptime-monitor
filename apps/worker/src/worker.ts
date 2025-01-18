@@ -3,17 +3,20 @@ import { invokeLambda } from "./invokeLambda";
 import { MonitorType } from "@repo/common";
 import { config } from "dotenv";
 import { prisma } from "@repo/db";
-import { createClient } from "redis";
+// import { Redis} from "@upstash/redis";
+
 import { getPrettyDate, notifyIncidentToTeam } from "./utils";
+import Redis from "ioredis";
 
 config({ path: "../.env" });
 
 console.log("Worker is running...");
 
+console.log("UPSTASH_REDIS_REST_URL", process.env.UPSTASH_REDIS_REST_URL);
 const connection: ConnectionOptions = {
-  host: process.env.UPSTASH_REDIS_REST_URL,
+  url: process.env.UPSTASH_REDIS_REST_URL,
   password: process.env.UPSTASH_REDIS_REST_TOKEN,
-  port: 6379,
+  port: 6379
 };
 
 type ResultResponse = {
@@ -34,23 +37,26 @@ type ResultResponse = {
   };
 };
 
-const createRedisClient = () => {
-  if (process.env.NODE_ENV === "production") {
-    return createClient({ url: process.env.UPSTASH_REDIS_URL });
-  }
-  return createClient();
-};
+// const createRedisClient = () => {
+//   return createClient({
+//     url: "",
+//     password: "",
+//   });
+// };
 
-const client = createRedisClient();
+// const client = createRedisClient();
+const client = new Redis(process.env.UPSTASH_REDIS_REST_URL!);
+
 (async () => {
   try {
-    await client.connect();
+    // await client.connect();
+
+    console.log('YES CONNECTED');
   } catch (err) {
     console.error("Failed to connect to Redis:", err);
     process.exit(1);
   }
 })();
-
 const worker = new Worker(
   "HealthCheckQueue",
   async (job: Job) => {
