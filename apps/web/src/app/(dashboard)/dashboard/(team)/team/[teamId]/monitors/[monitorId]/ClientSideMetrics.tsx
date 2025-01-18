@@ -25,7 +25,7 @@ export default function ClientSideMetrics() {
   return (
     <>
         <div className="">
-          {monitorId}  
+          {/* {monitorId}   */}
           <Chart />
         </div>
     </>
