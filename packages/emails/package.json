@@ -16,6 +16,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@repo/emails": "*",
     "@react-email/components": "^0.0.32",
     "@react-email/render": "^1.0.4",
     "dotenv": "^16.4.7",
