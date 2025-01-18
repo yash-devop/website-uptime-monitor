@@ -34,11 +34,11 @@ export default async function Home() {
                 )}
               </Link>
             </Button>
-            <Button asChild className="h-9" variant={"outline"}>
+            {/* <Button asChild className="h-9" variant={"outline"}>
               <Link href={"/pricing"}>
                 <p>Pricing</p>
               </Link>
-            </Button>
+            </Button> */}
           </div>
         </div>
       </div>
