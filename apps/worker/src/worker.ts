@@ -55,8 +55,10 @@ const worker = new Worker(
   async (job: Job) => {
     const monitorData: MonitorType & { id: string } = job.data;
     const REGIONS = ["ap-south-1"];
-    
-    console.log(`Monitor log => ${monitorData.url} is processed by worker after ${job.id}.`);
+
+    console.log(
+      `Monitor log => ${monitorData.url} is processed by worker after ${job.id}.`
+    );
     const AWS_RESPONSE = await Promise.all(
       REGIONS.map((region) =>
         invokeLambda(region, {
@@ -66,7 +68,7 @@ const worker = new Worker(
       )
     );
 
-    AWS_RESPONSE.map(async (response) => {
+    for (const response of AWS_RESPONSE) {
       const websiteStatus = JSON.parse(
         JSON.parse(new TextDecoder("utf-8").decode(response.Payload)).body
       ) as ResultResponse;
@@ -131,13 +133,13 @@ const worker = new Worker(
             data: { incidentStatus: "ongoing" },
           });
           await prisma.monitor.update({
-            data:{
-              status: "down"
+            data: {
+              status: "down",
             },
-            where:{
-              id: monitorData.id
-            }
-          })
+            where: {
+              id: monitorData.id,
+            },
+          });
 
           console.log("🔄 Status updated from validating to ongoing");
           const {
@@ -158,7 +160,7 @@ const worker = new Worker(
             incidentName,
             "ongoing",
             startedAt,
-            error!.cause ?? incidentCause
+            error?.cause || incidentCause
           );
         } else {
           // Website is up → resolve the incident
@@ -167,13 +169,13 @@ const worker = new Worker(
             data: { incidentStatus: "resolved", resolvedAt: new Date() },
           });
           await prisma.monitor.update({
-            data:{
-              status: "up"
+            data: {
+              status: "up",
             },
-            where:{
-              id: monitorData.id
-            }
-          })
+            where: {
+              id: monitorData.id,
+            },
+          });
 
           console.log("✅ Status updated from validating to resolved");
           const {
@@ -194,10 +196,9 @@ const worker = new Worker(
             incidentName,
             "ongoing",
             startedAt,
-            error!.cause ?? incidentCause
+            error?.cause || incidentCause
           );
         }
-        return; // Early return for "validating"
       }
 
       // Other cases (ongoing, no incident, resolved, or no changes)
@@ -235,7 +236,7 @@ const worker = new Worker(
             incidentName,
             "ongoing",
             startedAt,
-            error!.cause ?? incidentCause
+            error?.cause || incidentCause
           );
         } else {
           await prisma.monitor.update({
@@ -248,10 +249,9 @@ const worker = new Worker(
           });
           console.log("✅ Website is up and no incidents to update");
         }
-        return;
       }
 
-      if (currentIncident.incidentStatus === "ongoing") {
+      if (currentIncident?.incidentStatus === "ongoing") {
         if (isUp) {
           // Resolve the ongoing incident if website is back up
           await prisma.incident.update({
@@ -287,15 +287,15 @@ const worker = new Worker(
             incidentName,
             "resolved",
             startedAt,
-            error!.cause ?? incidentCause
+            error?.cause || incidentCause
           );
         } else {
           console.log(
             "🚨 Website is still down; ongoing incident remains unchanged"
           );
         }
-        return;
       }
+      console.log("🔍 Debugging: About to publish to Redis...");
 
       // Publishing to redis pub/sub
       try {
@@ -307,7 +307,7 @@ const worker = new Worker(
       } catch (error) {
         console.error("❌ ERROR while publishing to Redis: ", error);
       }
-    });
+    }
   },
   {
     connection,
@@ -315,28 +315,26 @@ const worker = new Worker(
 );
 
 worker.on("completed", (job) => {
-  console.log('\n');
+  console.log("\n");
   console.log("------------ Worker is now free ---------------");
 });
 
+worker.on("active", (job) => {
+  console.log("Job", job.data);
+  console.log(
+    `Active Monitor => ${job.data.url} is processed by worker after ${job.id}.`
+  );
+});
 
-worker.on("active", (job)=>{
-  console.log('Job',job.data);
-  console.log(`Active Monitor => ${job.data.url} is processed by worker after ${job.id}.`);
-
-})
-
-
-
-worker.on('drained', () => {
+worker.on("drained", () => {
   // Queue is drained, no more jobs left
-  console.log('No more jobs left');
+  console.log("No more jobs left");
 });
-worker.on('closing', (s) => {
+worker.on("closing", (s) => {
   // working is closingggg....
-  console.log('Worker is now closing....',s);
+  console.log("Worker is now closing....", s);
 });
 
-process.on("SIGINT",async()=>{
-  await worker.close()
-})
+process.on("SIGINT", async () => {
+  await worker.close();
+});
