@@ -7,6 +7,7 @@ import { INCIDENT_STATUS, prisma } from "@repo/db";
 import Link from "next/link";
 import { format } from "date-fns";
 import { IncidentCTA } from "./IncidentCTA";
+import { SearchCheck } from "lucide-react";
 
 // 1. Static Metadata
 // export const metadata:Metadata = {
@@ -84,7 +85,7 @@ export default async function MonitorIDPage({
     },
     resolved: {
       // title: "Resolved at",
-      value: incident?.resolvedAt?.toString() || "---",
+      value: format(incident?.resolvedAt || "","dd MMM yyyy 'at' hh:mm a" ) || "---",
     },
   };
   return (
@@ -94,15 +95,16 @@ export default async function MonitorIDPage({
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <IconGenerator
+                Icon={<SearchCheck size={20} className={`shrink-0 ${incident.incidentStatus === "ongoing" ? "text-red-400" : incident.incidentStatus === "validating" ? "text-yellow-400" : incident.incidentStatus === "resolved" ? "text-green-400" : "text-gray-400"}`} />}
                 iconType="fancy"
-                color="size-11 rounded-lg"
+                color={`size-11 rounded-lg ${incident.incidentStatus === "ongoing" ? "text-red-400 bg-red-400/25" : incident.incidentStatus === "validating" ? "text-yellow-400 bg-yellow-400/25" : incident.incidentStatus === "resolved" ? "text-green-400 bg-green-400/25" : "text-gray-400 bg-gray-400/25"}`}
                 iconSize="size-6"
               />
               <div>
                 <h1 className="text-xl font-semibold">
                   {incident.incidentName}
                 </h1>
-                <p className="text-red-400 text-sm">
+                <p className={`${incident.incidentStatus === "ongoing" ? "text-red-400" : incident.incidentStatus === "validating" ? "text-yellow-400" : incident.incidentStatus === "resolved" ? "text-green-400" : "text-gray-400"} text-sm`}>
                   {incident.incidentStatus}
                   <span className="text-neutral-4">
                     {" "}
@@ -145,7 +147,7 @@ export default async function MonitorIDPage({
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <StatusCard name="Cause" status={incident.incidentName} />
-            <StatusCard name={"Started"} status="10 Jan 2025 at 10pm" />
+            <StatusCard name={"Started"} status={format(incident.createdAt, "dd MMM yyyy 'at' hh:mm a")} />
             <StatusCard name="Status" status={Incident_status[incident.incidentStatus].value} />
           </div>
           <div className=" bg-neutral-7  border border-neutral-6 rounded-lg overflow-hidden">

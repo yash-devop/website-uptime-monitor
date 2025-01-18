@@ -60,7 +60,7 @@ export default async function IncidentPage({
                         <div className="flex flex-col">
                           <h2 className="text-sm">{incidentName}</h2>
                           <p className="text-neutral-3 text-xs">
-                            <span className="text-red-400">
+                            <span className={`${incidentStatus === "ongoing" ? "text-red-400" : incidentStatus === "validating" ? "text-yellow-400" : incidentStatus === "resolved" ? "text-green-400" : "text-gray-400"}`}>
                               {incidentCause}
                             </span>
                           </p>
@@ -77,7 +77,7 @@ export default async function IncidentPage({
                       </DisplayRightElement>
                       <DisplayRightElement>
                         <div className="text-sm text-neutral-3 flex items-center gap-2 w-fit">
-                          <Dot className="size-2 bg-red-500"/>
+                          <Dot className={`${incidentStatus === "ongoing" ? "bg-red-500" : incidentStatus === "validating" ? "bg-yellow-500" : incidentStatus === "resolved" ? "bg-green-500" : "bg-gray-500"} size-2`}/>
                           <p className="capitalize">{incidentStatus}</p>
                         </div>
                       </DisplayRightElement>

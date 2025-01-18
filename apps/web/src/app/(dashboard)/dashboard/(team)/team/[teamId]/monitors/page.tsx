@@ -34,7 +34,7 @@ export default async function MonitorPage({
     include: {
       CheckLog: {
         orderBy: {
-          isUp: "asc",
+          updatedAt: "desc",
         },
         take: 1,
       },
@@ -43,6 +43,9 @@ export default async function MonitorPage({
       createdAt: "desc",
     },
   });
+
+  console.log('monitors',monitors);
+  console.log('checklog',monitors[0].CheckLog);
   
   function formatMilliseconds(ms:number) {
     const seconds = millisecondsToSeconds(ms);
