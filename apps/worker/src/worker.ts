@@ -11,7 +11,8 @@ config({ path: "../.env" });
 console.log("Worker is running...");
 
 const connection: ConnectionOptions = {
-  host: "localhost",
+  host: process.env.UPSTASH_REDIS_REST_URL,
+  password: process.env.UPSTASH_REDIS_REST_TOKEN,
   port: 6379,
 };
 

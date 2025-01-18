@@ -8,9 +8,10 @@ type BullQueueType = {
 export function BullQueue<T, K>({
   queueName,
   connection = {
-    host: "localhost",
+    host: process.env.UPSTASH_REDIS_REST_URL,
+    password: process.env.UPSTASH_REDIS_REST_TOKEN,
     port: 6379,
-  },
+  }
 }: BullQueueType): Queue<T, K> {
   try {
     const queue = new Queue<T, K>(queueName, {
