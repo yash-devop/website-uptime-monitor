@@ -66,30 +66,12 @@ export const POST = async (req: NextRequest, res: NextResponse) => {
     console.log('Monitor created: ', monitor);
 
     if (monitor) {
-      // const jobId = `HealthCheckJob-${monitor.id}`;
       const repeatableJobId = `HealthCheckJob-repeat-${monitor.id}`;
       try {
-        // const immediateJob = await HealthCheckQueue.add(jobId, monitor, {     // created to executed that monitor ASAP.
-        //   delay: 0,
-        //   jobId,
-        //   removeOnComplete: true   
-        // });
         const repeatableJob = await HealthCheckQueue.upsertJobScheduler(repeatableJobId,{
           every: Number(checkFrequency),
           
         },{name: repeatableJobId,data:monitor})
-  
-        // console.log('immediate job', {
-        //   id: immediateJob.id,
-        //   data: immediateJob.data,
-        //   opts: immediateJob.opts
-        // });
-        // console.log('repeatableJob', {
-        //   id: repeatableJob.id,
-        //   data: repeatableJob.data,
-        //   opts: repeatableJob.opts
-        // });
-        
       } catch (error) {
         console.log('error while creating Monitor Job', error);
       }
