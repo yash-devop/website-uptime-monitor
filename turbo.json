@@ -26,6 +26,10 @@
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**","dist/**"]
     },
+    "worker:build": {
+      "dependsOn": ["^worker:build"],
+      "outputs": ["dist/worker.cjs"]
+    },
     "lint": {
       "dependsOn": ["^lint"]
     },
