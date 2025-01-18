@@ -5,7 +5,7 @@
   "main": "./dist/client.js",
   "types": "./dist/client.d.ts",
   "exports": {
-    ".": "./dist/client.js"
+    ".": "./src/client.ts"
   },
   "scripts": {
     "dev": "tsc --watch",
