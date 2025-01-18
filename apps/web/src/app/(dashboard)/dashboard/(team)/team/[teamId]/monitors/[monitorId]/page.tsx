@@ -8,7 +8,7 @@ import {
 import React from "react";
 import Link from "next/link";
 import { MonitorCTA } from "./QuickCTA";
-import ClientSideMetrics from "./ClientSideMetrics";
+// import ClientSideMetrics from "./ClientSideMetrics";
 
 export default async function MonitorIDPage({
   params,
@@ -92,7 +92,7 @@ export default async function MonitorIDPage({
               status={monitor?._count.Incident.toString() ?? "0"}
             />
           </div>
-          <ClientSideMetrics />
+          {/* <ClientSideMetrics /> */}
         </div>
       ) : (
         <>
