@@ -12,7 +12,6 @@ config({ path: "../.env" });
 
 console.log("Worker is running...");
 
-console.log("UPSTASH_REDIS_REST_URL", process.env.UPSTASH_REDIS_REST_URL);
 const connection: ConnectionOptions = {
   url: process.env.UPSTASH_REDIS_REST_URL,
   password: process.env.UPSTASH_REDIS_REST_TOKEN,
