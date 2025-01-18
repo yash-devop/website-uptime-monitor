@@ -7,7 +7,7 @@ import DisplayRow, {
   IconGenerator,
 } from "@/app/components/DisplayRow";
 import { prisma } from "@repo/db";
-import { Ellipsis } from "lucide-react";
+import { Ellipsis, Search, SearchCheck } from "lucide-react";
 import { headers } from "next/headers";
 import {formatDistance} from "date-fns"
 
@@ -52,6 +52,7 @@ export default async function IncidentPage({
                     <DisplayRowLeftSection className="gap-4">
                       <DisplayLeftElement>
                         <IconGenerator
+                          Icon={incidentStatus === "resolved" ? <SearchCheck size={18}/> : incidentStatus === "validating" ? <Search /> : null}
                           iconType="fancy"
                           color={`${incidentStatus === "ongoing" ? "text-red-400 bg-red-400/25" : incidentStatus === "validating" ? "text-yellow-400 bg-yellow-400/25" : incidentStatus === "resolved" ? "text-green-400 bg-green-400/25" : "text-gray-400 bg-gray-400/25"}`}
                         />
