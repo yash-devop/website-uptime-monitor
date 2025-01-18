@@ -45,7 +45,7 @@ export default async function MonitorPage({
   });
 
   console.log('monitors',monitors);
-  console.log('checklog',monitors[0].CheckLog);
+  // console.log('checklog',monitors[0].CheckLog);
   
   function formatMilliseconds(ms:number) {
     const seconds = millisecondsToSeconds(ms);
@@ -82,10 +82,10 @@ export default async function MonitorPage({
                   <DisplayRowLeftSection className="gap-9">
                     <DisplayLeftElement>
                       <IconGenerator
-                        iconType={CheckLog.length > 0 ? "dot" : "dot"}
+                        iconType={CheckLog && CheckLog.length > 0 ? "dot" : "dot"}
                         heartBeatType={"once"}
                         className={
-                          CheckLog.length > 0
+                          CheckLog &&  CheckLog.length > 0
                             ? CheckLog[0].webStatus === "down"
                               ? "bg-red-400 text-red-400"
                               : ""
@@ -97,7 +97,7 @@ export default async function MonitorPage({
                       <div className="flex flex-col">
                         <h2 className="text-sm">{urlAlias}</h2>
                         <p className="text-neutral-3 text-xs">
-                          <span className={`${CheckLog.length > 0
+                          <span className={`${CheckLog && CheckLog.length > 0
                             ? CheckLog[0].webStatus === "down"
                               ? " text-red-400"
                               : ""
