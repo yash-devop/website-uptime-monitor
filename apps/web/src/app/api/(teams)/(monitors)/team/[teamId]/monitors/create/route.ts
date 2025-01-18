@@ -5,7 +5,7 @@ import { zodParser } from "@/utils/zodParser";
 import { prisma } from "@repo/db";
 import { HealthCheckQueue } from "@/queues";
 
-export const POST = async (req: NextRequest, res: NextResponse) => {
+export const POST = async (req: NextRequest) => {
   const session = await auth();
 
   if (!session || !session.user) {
@@ -68,7 +68,7 @@ export const POST = async (req: NextRequest, res: NextResponse) => {
     if (monitor) {
       const repeatableJobId = `HealthCheckJob-repeat-${monitor.id}`;
       try {
-        const repeatableJob = await HealthCheckQueue.upsertJobScheduler(repeatableJobId,{
+        await HealthCheckQueue.upsertJobScheduler(repeatableJobId,{
           every: Number(checkFrequency),
           
         },{name: repeatableJobId,data:monitor})

@@ -2,7 +2,7 @@ import { IconGenerator } from "@/app/components/DisplayRow";
 import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
 import ClientSideTabs from "./ClientSideTabs";
-import { Metadata, ResolvingMetadata } from "next";
+import { Metadata } from "next";
 import { INCIDENT_STATUS, prisma } from "@repo/db";
 import Link from "next/link";
 import { format } from "date-fns";

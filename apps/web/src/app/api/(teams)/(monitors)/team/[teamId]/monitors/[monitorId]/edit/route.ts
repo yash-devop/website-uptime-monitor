@@ -1,7 +1,6 @@
 import { auth } from "@/utils/auth";
 import { NextRequest, NextResponse } from "next/server";
-import { CheckFrequencyType, editMonitorSchema, type MonitorType } from "@repo/common";
-import { monitorSchema } from "@repo/common";
+import { editMonitorSchema } from "@repo/common";
 import { zodParser } from "@/utils/zodParser";
 import { prisma } from "@repo/db";
 import { HealthCheckQueue } from "@/queues";

@@ -8,11 +8,9 @@ import {
   Font,
   Section,
   Hr,
-  Text,
   Preview,
   Img,
   Column,
-  Row,
   Button,
   Link,
 } from "@react-email/components";

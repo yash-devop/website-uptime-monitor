@@ -1,6 +1,6 @@
 import { auth } from "@/utils/auth";
 import {prisma} from "@repo/db";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 export const POST = async () => {
   const session = await auth();

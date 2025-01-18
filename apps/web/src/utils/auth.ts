@@ -36,7 +36,7 @@ export const AUTH_OPTIONS = {
       }
       return token;
     },
-    session: async ({ session, token, user }) => {
+    session: async ({ session, token }) => {
       return {
         ...session,
         user: {
@@ -49,7 +49,7 @@ export const AUTH_OPTIONS = {
       // Logged in users are authenticated, otherwise redirect to login page
       return !!auth;
     },
-    async signIn({ user, account, profile }) {
+    async signIn({ user}) {
       // Check if the user exists in the database
       const existingUser = await prisma.user.findUnique({
         where: { email: user.email! },

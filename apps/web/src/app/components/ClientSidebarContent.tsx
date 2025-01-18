@@ -14,7 +14,6 @@ import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import {
   Activity,
-  Settings,
   Siren,
   Layers3,
   Vibrate,
